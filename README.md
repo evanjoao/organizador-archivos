@@ -4,12 +4,13 @@ Una aplicación de escritorio desarrollada en Python para organizar automáticam
 
 ## Características
 
-- Interfaz gráfica moderna y fácil de usar
+- Interfaz gráfica moderna y fácil de usar (Tkinter + ttk, estilos personalizados)
 - Organización automática de archivos por tipo
 - Soporte para múltiples tipos de archivos
 - Visualización en tiempo real del progreso
-- Registro detallado de operaciones
-- Navegación intuitiva por directorios
+- Registro detallado de operaciones con mensajes codificados por color
+- Navegación intuitiva por directorios (árbol de directorios, selección personalizada)
+- Compatible con Windows, Linux y macOS
 
 ## Requisitos
 
@@ -22,15 +23,17 @@ Una aplicación de escritorio desarrollada en Python para organizar automáticam
 1. Clona este repositorio:
 
 ```bash
-git clone https://github.com/tu-usuario/organizador-archivos.git
+git clone https://github.com/evanjoao/organizador-archivos.git
 cd organizador-archivos
 ```
 
-2. Instala las dependencias:
+2. Instala las dependencias (si tienes requirements.txt):
 
 ```bash
 pip install -r requirements.txt
 ```
+
+> **Nota:** Si no existe `requirements.txt`, solo asegúrate de tener Python 3 y tkinter instalado.
 
 ## Uso
 
@@ -49,11 +52,19 @@ python app.py
 
 ```
 organizador-archivos/
-├── app.py              # Aplicación principal
-├── config.py           # Configuración y constantes
-├── requirements.txt    # Dependencias del proyecto
-└── README.md          # Este archivo
+├── app.py              # Aplicación principal (Tkinter)
+├── config.py           # Configuración y constantes visuales
+├── requirements.txt    # Dependencias del proyecto (opcional)
+├── LICENSE             # Licencia MIT
+└── README.md           # Este archivo
 ```
+
+## Cambios recientes
+
+- Migración completa a Tkinter y ttk para una experiencia visual moderna y multiplataforma
+- Mejoras en la visualización del árbol de directorios y el área de log
+- Mensajes de log codificados por color (info, éxito, advertencia, error)
+- Mejoras en la organización y el diseño responsivo de la interfaz
 
 ## Contribuir
 
@@ -69,8 +80,8 @@ Las contribuciones son bienvenidas. Por favor, sigue estos pasos:
 
 Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más detalles.
 
-## Contacto
+## Autor y Contacto
 
-Tu Nombre - [@tutwitter](https://twitter.com/tutwitter) - <email@ejemplo.com>
+Evan Joao - [evanjoaogarciamunoz@gmail.com](mailto:evanjoaogarciamunoz@gmail.com)
 
-Link del Proyecto: [https://github.com/tu-usuario/organizador-archivos](https://github.com/tu-usuario/organizador-archivos)
+Link del Proyecto: [https://github.com/evanjoao/organizador-archivos](https://github.com/evanjoao/organizador-archivos)
