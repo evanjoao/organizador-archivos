@@ -1,87 +1,87 @@
-# Organizador de Archivos
+# File Organizer
 
-Una aplicación de escritorio desarrollada en Python para organizar automáticamente archivos en carpetas según su tipo.
+A desktop application developed in Python to automatically organize files into folders by type.
 
-## Características
+## Features
 
-- Interfaz gráfica moderna y fácil de usar (Tkinter + ttk, estilos personalizados)
-- Organización automática de archivos por tipo
-- Soporte para múltiples tipos de archivos
-- Visualización en tiempo real del progreso
-- Registro detallado de operaciones con mensajes codificados por color
-- Navegación intuitiva por directorios (árbol de directorios, selección personalizada)
-- Compatible con Windows, Linux y macOS
+- Modern and easy-to-use graphical interface (Tkinter + ttk, custom styles)
+- Automatic file organization by type
+- Support for multiple file types
+- Real-time progress visualization
+- Detailed operation log with color-coded messages
+- Intuitive directory navigation (directory tree, custom selection)
+- Compatible with Windows, Linux, and macOS
 
-## Requisitos
+## Requirements
 
 - Python 3.x
-- tkinter (incluido en la mayoría de las instalaciones de Python)
-- Sistema operativo: Windows, Linux o macOS
+- tkinter (included in most Python installations)
+- Operating system: Windows, Linux, or macOS
 
-## Instalación
+## Installation
 
-1. Clona este repositorio:
+1. Clone this repository:
 
 ```bash
 git clone https://github.com/evanjoao/organizador-archivos.git
 cd organizador-archivos
 ```
 
-2. Instala las dependencias (si tienes requirements.txt):
+2. Install dependencies (if you have requirements.txt):
 
 ```bash
 pip install -r requirements.txt
 ```
 
-> **Nota:** Si no existe `requirements.txt`, solo asegúrate de tener Python 3 y tkinter instalado.
+> **Note:** If there is no `requirements.txt`, just make sure you have Python 3 and tkinter installed.
 
-## Uso
+## Usage
 
-1. Ejecuta la aplicación:
+1. Run the application:
 
 ```bash
 python app.py
 ```
 
-2. Selecciona el directorio que deseas organizar
-3. Haz clic en "Organizar Archivos"
-4. Espera a que se complete el proceso
-5. Revisa el registro de actividad para ver los detalles
+2. Select the directory you want to organize
+3. Click on "Organize Files"
+4. Wait for the process to complete
+5. Check the activity log for details
 
-## Estructura del Proyecto
+## Project Structure
 
 ```
 organizador-archivos/
-├── app.py              # Aplicación principal (Tkinter)
-├── config.py           # Configuración y constantes visuales
-├── requirements.txt    # Dependencias del proyecto (opcional)
-├── LICENSE             # Licencia MIT
-└── README.md           # Este archivo
+├── app.py              # Main application (Tkinter)
+├── config.py           # Visual configuration and constants
+├── requirements.txt    # Project dependencies (optional)
+├── LICENSE             # MIT License
+└── README.md           # This file
 ```
 
-## Cambios recientes
+## Recent Changes
 
-- Migración completa a Tkinter y ttk para una experiencia visual moderna y multiplataforma
-- Mejoras en la visualización del árbol de directorios y el área de log
-- Mensajes de log codificados por color (info, éxito, advertencia, error)
-- Mejoras en la organización y el diseño responsivo de la interfaz
+- Complete migration to Tkinter and ttk for a modern, cross-platform visual experience
+- Improved directory tree and log area visualization
+- Color-coded log messages (info, success, warning, error)
+- Improved organization and responsive interface design
 
-## Contribuir
+## Contributing
 
-Las contribuciones son bienvenidas. Por favor, sigue estos pasos:
+Contributions are welcome! Please follow these steps:
 
-1. Haz un Fork del proyecto
-2. Crea una rama para tu característica (`git checkout -b feature/AmazingFeature`)
-3. Haz commit de tus cambios (`git commit -m 'Add some AmazingFeature'`)
-4. Push a la rama (`git push origin feature/AmazingFeature`)
-5. Abre un Pull Request
+1. Fork the project
+2. Create a branch for your feature (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
-## Licencia
+## License
 
-Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más detalles.
+This project is under the MIT License. See the `LICENSE` file for more details.
 
-## Autor y Contacto
+## Author & Contact
 
 Evan Joao - [evanjoaogarciamunoz@gmail.com](mailto:evanjoaogarciamunoz@gmail.com)
 
-Link del Proyecto: [https://github.com/evanjoao/organizador-archivos](https://github.com/evanjoao/organizador-archivos)
+Project Link: [https://github.com/evanjoao/organizador-archivos](https://github.com/evanjoao/organizador-archivos)
