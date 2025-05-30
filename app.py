@@ -40,20 +40,25 @@ class FileOrganizer:
                 f"El directorio '{source_directory}' no existe o no es válido."
             )
             logging.error(error_message)
+            self.log_messages.append(error_message)  # Registrar también en log_messages
             return 0, 0, error_message
 
         self.files_moved_count = 0
         self.folders_created_count = 0
-        self.log_messages = []
+        self.log_messages = [
+            f"Iniciando organización en: {source_directory}"
+        ]  # Mensaje inicial
 
         try:
-            # Obtener lista de archivos
             files = [
                 f
                 for f in os.listdir(source_directory)
                 if os.path.isfile(os.path.join(source_directory, f))
             ]
             total_files = len(files)
+            if total_files == 0:
+                self.log_messages.append("No se encontraron archivos para organizar.")
+                return 0, 0, "\n".join(self.log_messages)
 
             for index, item_name in enumerate(files, 1):
                 if progress_callback:
@@ -64,16 +69,14 @@ class FileOrganizer:
                 file_extension = self.get_file_extension(item_name)
                 category_name = self.get_category_for_extension(file_extension)
 
-                # Crear carpeta de destino
                 destination_folder_path = os.path.join(source_directory, category_name)
                 if not os.path.exists(destination_folder_path):
                     try:
                         os.makedirs(destination_folder_path)
                         self.folders_created_count += 1
-                        self.log_messages.append(
-                            f"Carpeta creada: {destination_folder_path}"
-                        )
-                        logging.info(f"Carpeta creada: {destination_folder_path}")
+                        msg = f"Carpeta creada: {destination_folder_path}"
+                        self.log_messages.append(msg)
+                        logging.info(msg)
                     except OSError as e:
                         error_msg = (
                             f"Error al crear carpeta {destination_folder_path}: {e}"
@@ -82,36 +85,55 @@ class FileOrganizer:
                         logging.error(error_msg)
                         continue
 
-                # Mover archivo
                 destination_file_path = os.path.join(destination_folder_path, item_name)
+                original_item_name = item_name  # Guardar nombre original para logs
                 base_name, ext_name = os.path.splitext(item_name)
                 counter = 1
 
                 while os.path.exists(destination_file_path):
-                    item_name = f"{base_name}_{counter}{ext_name}"
+                    item_name_new = f"{base_name}_{counter}{ext_name}"
                     destination_file_path = os.path.join(
-                        destination_folder_path, item_name
+                        destination_folder_path, item_name_new
                     )
                     counter += 1
+
+                # Si el nombre cambió por colisión, usar el nuevo nombre para el movimiento
+                # pero el original para el mensaje de log si es posible.
+                # En este caso, item_name ya está actualizado si hubo colisión.
 
                 try:
                     shutil.move(item_path, destination_file_path)
                     self.files_moved_count += 1
-                    self.log_messages.append(
-                        f"Movido: '{item_name}' -> '{category_name}/{item_name}'"
-                    )
-                    logging.info(
-                        f"Archivo movido: {item_name} -> {category_name}/{item_name}"
-                    )
+                    # Usar item_name que es el nombre final del archivo (puede tener _counter)
+                    msg = f"Movido: '{item_name}' -> '{category_name}/{item_name}'"
+                    self.log_messages.append(msg)
+                    logging.info(msg)
                 except Exception as e:
-                    error_msg = f"Error al mover '{item_name}': {e}"
+                    error_msg = f"Error al mover '{original_item_name}': {e}"
                     self.log_messages.append(error_msg)
                     logging.error(error_msg)
 
         except Exception as e:
-            error_msg = f"Error inesperado: {str(e)}"
+            error_msg = f"Error inesperado durante la organización: {str(e)}"
+            self.log_messages.append(error_msg)
             logging.error(error_msg)
-            return self.files_moved_count, self.folders_created_count, error_msg
+            # Devolver los conteos actuales y los mensajes de log acumulados
+            return (
+                self.files_moved_count,
+                self.folders_created_count,
+                "\n".join(self.log_messages),
+            )
+
+        if (
+            self.files_moved_count == 0
+            and self.folders_created_count == 0
+            and total_files > 0
+        ):
+            self.log_messages.append(
+                "No se movieron archivos ni se crearon carpetas nuevas (posiblemente ya estaban organizados o hubo errores)."
+            )
+        elif total_files > 0:
+            self.log_messages.append("Organización completada.")
 
         return (
             self.files_moved_count,
@@ -125,40 +147,54 @@ class App:
         self.root = root
         self.root.title(UI_CONFIG["window_title"])
         self.root.geometry(UI_CONFIG["window_size"])
+        self.root.option_add(
+            "*Font",
+            (UI_CONFIG["theme"]["font_family"], UI_CONFIG["theme"]["font_size"]),
+        )
 
-        # Configurar tema y estilos
         self.setup_styles()
         self.setup_ui()
         self.file_organizer = FileOrganizer()
-
-        # Cargar directorios iniciales
         self.load_initial_directories()
-
-        # Vincular evento de redimensionamiento
         self.root.bind("<Configure>", self.on_window_resize)
 
     def setup_styles(self):
-        """Configura los estilos de la aplicación"""
         self.style = ttk.Style()
 
-        # Configurar tema general
+        # Intentar establecer un tema base que permita más personalización si es posible
+        # Temas comunes: 'clam', 'alt', 'default', 'classic'
+        # 'clam' suele ser bueno para personalizar
+        try:
+            self.style.theme_use("clam")
+        except tk.TclError:
+            print("Tema 'clam' no disponible, usando tema por defecto.")
+
+        # Estilo general para todos los widgets ttk (si el tema lo permite)
         self.style.configure(
             ".",
             background=UI_CONFIG["theme"]["background_color"],
-            foreground="black",
+            foreground="black",  # Color de texto por defecto
             font=(UI_CONFIG["theme"]["font_family"], UI_CONFIG["theme"]["font_size"]),
         )
 
-        # Estilo para frames
+        # Estilo para LabelFrame
         self.style.configure(
             "Custom.TLabelframe",
             background=UI_CONFIG["theme"]["background_color"],
+            padding=UI_CONFIG["theme"]["padding"]["medium"],
+        )
+        self.style.configure(
+            "Custom.TLabelframe.Label",  # Estilo para el texto de la etiqueta del LabelFrame
+            background=UI_CONFIG["theme"]["background_color"],
             foreground="black",
-            borderwidth=2,
-            relief="solid",
+            font=(
+                UI_CONFIG["theme"]["font_family"],
+                UI_CONFIG["theme"]["font_size"],
+                "bold",
+            ),
         )
 
-        # Estilo para botones
+        # Estilo para Botones
         self.style.configure(
             "Custom.TButton",
             font=(
@@ -166,87 +202,149 @@ class App:
                 UI_CONFIG["theme"]["font_size"],
                 "bold",
             ),
-            padding=10,
+            padding=UI_CONFIG["theme"]["padding"]["medium"],
             background=UI_CONFIG["theme"]["primary_color"],
             foreground=UI_CONFIG["theme"]["text_color"],
+            relief="raised",  # Estilo de borde
+            borderwidth=2,
+        )
+        self.style.map(
+            "Custom.TButton",
+            background=[
+                ("active", UI_CONFIG["theme"]["secondary_color"]),
+                ("pressed", UI_CONFIG["theme"]["secondary_color"]),
+            ],
+            relief=[("pressed", "sunken")],
         )
 
-        # Estilo para la barra de progreso
+        # Estilo para Barra de Progreso
         self.style.configure(
             "Custom.Horizontal.TProgressbar",
-            troughcolor=UI_CONFIG["theme"]["background_color"],
-            background=UI_CONFIG["theme"]["primary_color"],
+            troughcolor=UI_CONFIG["theme"]["background_color"],  # Color del canal
+            background=UI_CONFIG["theme"]["primary_color"],  # Color de la barra
             thickness=20,
         )
 
-        # Estilo para el Treeview
+        # Estilo para Treeview
         self.style.configure(
             "Custom.Treeview",
-            background=UI_CONFIG["theme"]["background_color"],
-            foreground="black",
-            fieldbackground=UI_CONFIG["theme"]["background_color"],
+            background=UI_CONFIG["theme"][
+                "background_color"
+            ],  # Fondo general del widget
+            fieldbackground=UI_CONFIG["theme"][
+                "background_color"
+            ],  # Fondo de las celdas
+            foreground="black",  # Color del texto
             font=(UI_CONFIG["theme"]["font_family"], UI_CONFIG["theme"]["font_size"]),
+            rowheight=30,  # MEJORA: Aumentar altura de fila
         )
-
         self.style.configure(
             "Custom.Treeview.Heading",
             font=(
                 UI_CONFIG["theme"]["font_family"],
-                UI_CONFIG["theme"]["font_size"],
+                UI_CONFIG["theme"]["font_size"] + 1,
                 "bold",
-            ),
+            ),  # Un poco más grande y negrita
             background=UI_CONFIG["theme"]["primary_color"],
             foreground=UI_CONFIG["theme"]["text_color"],
+            relief="raised",
         )
+        self.style.map(
+            "Custom.Treeview",
+            background=[
+                ("selected", UI_CONFIG["theme"]["primary_color"])
+            ],  # MEJORA: Usar color de config
+            foreground=[
+                ("selected", UI_CONFIG["theme"]["text_color"])
+            ],  # MEJORA: Usar color de config
+        )
+        # Para Entry, no hay un estilo ttk directo tan flexible como en CTk, pero podemos usar opciones
+        # self.root.option_add("*TEntry*Font", (UI_CONFIG["theme"]["font_family"], UI_CONFIG["theme"]["font_size"]))
 
     def setup_ui(self):
-        # Configurar el grid principal
         self.root.grid_rowconfigure(0, weight=1)
         self.root.grid_columnconfigure(0, weight=1)
+        self.root.configure(background=UI_CONFIG["theme"]["background_color"])
 
-        # Frame principal con padding y fondo
-        main_frame = ttk.Frame(self.root, padding="20", style="Custom.TLabelframe")
-        main_frame.grid(row=0, column=0, sticky="nsew")
-        main_frame.grid_rowconfigure(
-            3, weight=1
-        )  # Hacer que el área de log sea expansible
+        main_frame = ttk.Frame(
+            self.root,
+            padding=UI_CONFIG["theme"]["padding"]["large"],
+            style="Custom.TLabelframe",
+        )
+        main_frame.grid(row=0, column=0, sticky="nsew", padx=10, pady=10)
         main_frame.grid_columnconfigure(0, weight=1)
+        # Configurar filas para expansión, especialmente la del log
+        main_frame.grid_rowconfigure(0, weight=0)  # title_label
+        main_frame.grid_rowconfigure(
+            1, weight=1
+        )  # dir_selection_frame (contiene el treeview que debe expandirse)
+        main_frame.grid_rowconfigure(2, weight=0)  # selected_dir_frame
+        main_frame.grid_rowconfigure(3, weight=0)  # progress_frame
+        main_frame.grid_rowconfigure(4, weight=0)  # organize_button
+        main_frame.grid_rowconfigure(
+            5, weight=2
+        )  # log_frame (darle más peso para que se expanda más)
 
-        # Título de la aplicación
         title_label = ttk.Label(
             main_frame,
             text="Organizador de Archivos",
-            font=(UI_CONFIG["theme"]["font_family"], 16, "bold"),
-            padding=(0, 0, 0, 20),
+            font=(
+                UI_CONFIG["theme"]["font_family"],
+                18,
+                "bold",
+            ),  # MEJORA: Fuente más grande
+            anchor="center",
+            style="Custom.TLabelframe.Label",  # Para que tome el fondo correcto si es necesario
         )
-        title_label.grid(row=0, column=0, sticky="ew")
+        title_label.grid(
+            row=0,
+            column=0,
+            sticky="ew",
+            pady=(0, UI_CONFIG["theme"]["padding"]["large"]),
+        )
 
-        # Frame para la selección de directorio
-        dir_selection_frame = ttk.Frame(main_frame)
-        dir_selection_frame.grid(row=1, column=0, sticky="nsew", pady=(0, 15))
-        dir_selection_frame.grid_columnconfigure(0, weight=3)  # Árbol más ancho
-        dir_selection_frame.grid_columnconfigure(1, weight=1)  # Controles más estrechos
+        dir_selection_frame = ttk.Frame(
+            main_frame, style="Custom.TLabelframe"
+        )  # Usar el estilo para el fondo
+        dir_selection_frame.grid(
+            row=1,
+            column=0,
+            sticky="nsew",
+            pady=(0, UI_CONFIG["theme"]["padding"]["medium"]),
+        )
+        dir_selection_frame.grid_columnconfigure(0, weight=3)
+        dir_selection_frame.grid_columnconfigure(1, weight=1)
+        dir_selection_frame.grid_rowconfigure(
+            0, weight=1
+        )  # Permitir que el LabelFrame del árbol se expanda
 
-        # Panel izquierdo para el árbol de directorios
         dir_tree_frame = ttk.LabelFrame(
             dir_selection_frame,
             text="Directorios Disponibles",
-            padding="10",
+            padding=UI_CONFIG["theme"]["padding"]["medium"],
             style="Custom.TLabelframe",
         )
-        dir_tree_frame.grid(row=0, column=0, sticky="nsew", padx=(0, 10))
-        dir_tree_frame.grid_rowconfigure(0, weight=1)
+        dir_tree_frame.grid(
+            row=0,
+            column=0,
+            sticky="nsew",
+            padx=(0, UI_CONFIG["theme"]["padding"]["small"]),
+        )
+        dir_tree_frame.grid_rowconfigure(
+            0, weight=1
+        )  # El tree_container se expandirá en esta fila
         dir_tree_frame.grid_columnconfigure(0, weight=1)
 
-        # Frame para el árbol y su scrollbar con padding adicional
-        tree_container = ttk.Frame(dir_tree_frame)
+        # MEJORA: Padding superior para el tree_container para evitar solapamiento con el título del LabelFrame
+        tree_container = ttk.Frame(
+            dir_tree_frame, style="Custom.TLabelframe"
+        )  # Para heredar fondo
         tree_container.grid(
-            row=0, column=0, sticky="nsew", pady=(25, 0)
-        )  # Padding superior para evitar solapamiento
+            row=0, column=0, sticky="nsew", pady=(10, 0)
+        )  # pady=(top_padding, bottom_padding)
         tree_container.grid_rowconfigure(0, weight=1)
         tree_container.grid_columnconfigure(0, weight=1)
 
-        # Crear Treeview para directorios
         self.dir_tree = ttk.Treeview(
             tree_container,
             columns=("path",),
@@ -255,45 +353,41 @@ class App:
         )
         self.dir_tree.heading("#0", text="Nombre")
         self.dir_tree.heading("path", text="Ruta")
-        self.dir_tree.column("#0", width=200, minwidth=150)
-        self.dir_tree.column("path", width=300, minwidth=200)
+        self.dir_tree.column("#0", width=200, minwidth=150, stretch=tk.YES)
+        self.dir_tree.column("path", width=300, minwidth=200, stretch=tk.YES)
 
-        # Configurar el estilo del árbol
-        self.style.configure(
-            "Treeview",
-            rowheight=30,  # Aumentado para mejor legibilidad
-            font=(UI_CONFIG["theme"]["font_family"], UI_CONFIG["theme"]["font_size"]),
-        )
-
-        # Estilo para las filas alternas y selección
-        self.style.map(
-            "Treeview",
-            background=[("selected", UI_CONFIG["theme"]["primary_color"])],
-            foreground=[("selected", UI_CONFIG["theme"]["text_color"])],
-        )
-
-        # Vincular evento de selección
-        self.dir_tree.bind("<<TreeviewSelect>>", self.on_tree_select)
-
-        # Scrollbar para el árbol
-        tree_scroll = ttk.Scrollbar(
+        tree_scroll_y = ttk.Scrollbar(
             tree_container, orient="vertical", command=self.dir_tree.yview
         )
-        self.dir_tree.configure(yscrollcommand=tree_scroll.set)
+        tree_scroll_x = ttk.Scrollbar(
+            tree_container, orient="horizontal", command=self.dir_tree.xview
+        )
+        self.dir_tree.configure(
+            yscrollcommand=tree_scroll_y.set, xscrollcommand=tree_scroll_x.set
+        )
 
-        self.dir_tree.grid(
-            row=0, column=0, sticky="nsew", padx=(0, 5)
-        )  # Padding derecho para el scrollbar
-        tree_scroll.grid(row=0, column=1, sticky="ns")
+        self.dir_tree.grid(row=0, column=0, sticky="nsew")
+        tree_scroll_y.grid(row=0, column=1, sticky="ns")
+        tree_scroll_x.grid(row=1, column=0, sticky="ew")  # Scrollbar horizontal debajo
 
-        # Panel derecho para controles
-        controls_frame = ttk.Frame(dir_selection_frame)
+        tree_container.grid_rowconfigure(0, weight=1)
+        tree_container.grid_rowconfigure(1, weight=0)  # Para el scrollbar X
+        tree_container.grid_columnconfigure(0, weight=1)
+        tree_container.grid_columnconfigure(1, weight=0)  # Para el scrollbar Y
+
+        self.dir_tree.bind("<<TreeviewSelect>>", self.on_tree_select)
+
+        controls_frame = ttk.Frame(
+            dir_selection_frame, style="Custom.TLabelframe"
+        )  # Para heredar fondo
         controls_frame.grid(
-            row=0, column=1, sticky="n", padx=(5, 0)
-        )  # Padding izquierdo para separación
+            row=0,
+            column=1,
+            sticky="ns",
+            padx=(UI_CONFIG["theme"]["padding"]["small"], 0),
+        )  # sticky 'ns' para que los botones estén arriba
         controls_frame.grid_columnconfigure(0, weight=1)
 
-        # Botón para refrescar directorios
         refresh_button = ttk.Button(
             controls_frame,
             text="↻ Actualizar",
@@ -301,10 +395,12 @@ class App:
             style="Custom.TButton",
         )
         refresh_button.grid(
-            row=0, column=0, sticky="ew", pady=(0, 10)
-        )  # Espaciado entre botones
+            row=0,
+            column=0,
+            sticky="ew",
+            pady=(0, UI_CONFIG["theme"]["padding"]["small"]),
+        )
 
-        # Botón para seleccionar directorio personalizado
         custom_dir_button = ttk.Button(
             controls_frame,
             text="+ Otro Directorio",
@@ -313,200 +409,265 @@ class App:
         )
         custom_dir_button.grid(row=1, column=0, sticky="ew")
 
-        # Frame para la ruta seleccionada
         selected_dir_frame = ttk.LabelFrame(
             main_frame,
             text="Directorio Seleccionado",
-            padding="10",
+            padding=UI_CONFIG["theme"]["padding"]["medium"],
             style="Custom.TLabelframe",
         )
-        selected_dir_frame.grid(row=2, column=0, sticky="ew", pady=(0, 15))
+        selected_dir_frame.grid(
+            row=2,
+            column=0,
+            sticky="ew",
+            pady=(
+                UI_CONFIG["theme"]["padding"]["medium"],
+                UI_CONFIG["theme"]["padding"]["medium"],
+            ),
+        )
         selected_dir_frame.grid_columnconfigure(0, weight=1)
 
         self.source_dir_var = tk.StringVar()
         self.dir_entry = ttk.Entry(
             selected_dir_frame,
             textvariable=self.source_dir_var,
-            font=(UI_CONFIG["theme"]["font_family"], UI_CONFIG["theme"]["font_size"]),
+            font=(
+                UI_CONFIG["theme"]["font_family"],
+                UI_CONFIG["theme"]["font_size"],
+            ),  # Fuente para Entry
         )
-        self.dir_entry.grid(row=0, column=0, sticky="ew", padx=5, pady=5)
+        self.dir_entry.grid(
+            row=0, column=0, sticky="ew", padx=5, pady=5
+        )  # Padding interno en el LabelFrame
 
-        # Frame para la barra de progreso
-        progress_frame = ttk.Frame(main_frame)
-        progress_frame.grid(row=3, column=0, sticky="ew", pady=(0, 15))
-        progress_frame.grid_columnconfigure(0, weight=1)
+        progress_outer_frame = ttk.Frame(
+            main_frame, style="Custom.TLabelframe"
+        )  # Contenedor para la etiqueta y la barra
+        progress_outer_frame.grid(
+            row=3,
+            column=0,
+            sticky="ew",
+            pady=(0, UI_CONFIG["theme"]["padding"]["medium"]),
+        )
+        progress_outer_frame.grid_columnconfigure(
+            0, weight=1
+        )  # Para que la barra se expanda
 
         progress_label = ttk.Label(
-            progress_frame,
-            text="Progreso:",
-            font=(UI_CONFIG["theme"]["font_family"], UI_CONFIG["theme"]["font_size"]),
+            progress_outer_frame, text="Progreso:", style="Custom.TLabelframe.Label"
         )
-        progress_label.grid(row=0, column=0, sticky="w", pady=(0, 5))
+        progress_label.grid(
+            row=0,
+            column=0,
+            sticky="w",
+            padx=(0, 5),
+            pady=(0, UI_CONFIG["theme"]["padding"]["small"]),
+        )
 
         self.progress_var = tk.DoubleVar()
         self.progress_bar = ttk.Progressbar(
-            progress_frame,
+            progress_outer_frame,
             variable=self.progress_var,
             maximum=100,
             style="Custom.Horizontal.TProgressbar",
         )
-        self.progress_bar.grid(row=1, column=0, sticky="ew", pady=(0, 5))
+        self.progress_bar.grid(
+            row=1,
+            column=0,
+            sticky="ew",
+            pady=(0, UI_CONFIG["theme"]["padding"]["small"]),
+        )
 
-        # Botón de organizar
         organize_button = ttk.Button(
             main_frame,
             text="Organizar Archivos",
             command=self.start_organization,
             style="Custom.TButton",
         )
-        organize_button.grid(row=4, column=0, sticky="ew", pady=(0, 15))
+        organize_button.grid(
+            row=4,
+            column=0,
+            sticky="ew",
+            pady=(0, UI_CONFIG["theme"]["padding"]["medium"]),
+        )
 
-        # Área de Log
         log_frame = ttk.LabelFrame(
             main_frame,
             text="Registro de Actividad",
-            padding="10",
+            padding=UI_CONFIG["theme"]["padding"]["medium"],
             style="Custom.TLabelframe",
         )
         log_frame.grid(row=5, column=0, sticky="nsew")
         log_frame.grid_rowconfigure(0, weight=1)
         log_frame.grid_columnconfigure(0, weight=1)
 
-        # Contenedor para el área de texto y scrollbar
-        log_container = ttk.Frame(log_frame)
-        log_container.grid(row=0, column=0, sticky="nsew", padx=5, pady=5)
+        log_container = ttk.Frame(
+            log_frame, style="Custom.TLabelframe"
+        )  # Para heredar fondo
+        log_container.grid(
+            row=0, column=0, sticky="nsew", padx=5, pady=5
+        )  # Padding interno
         log_container.grid_rowconfigure(0, weight=1)
         log_container.grid_columnconfigure(0, weight=1)
 
-        # Crear Text widget con scrollbar
         self.log_text = tk.Text(
             log_container,
             wrap=tk.WORD,
-            height=15,
+            height=10,  # Altura inicial, se expandirá
             state=tk.DISABLED,
-            bg=UI_CONFIG["theme"]["background_color"],
             font=(UI_CONFIG["theme"]["font_family"], UI_CONFIG["theme"]["font_size"]),
-            padx=10,
-            pady=10,
+            bg=UI_CONFIG["theme"]["background_color"],  # Fondo del Text widget
+            fg="black",  # Color de texto por defecto para el log
+            padx=UI_CONFIG["theme"]["padding"]["small"],
+            pady=UI_CONFIG["theme"]["padding"]["small"],
+            relief=tk.SOLID,  # Borde para el Text
+            borderwidth=1,
         )
-        scrollbar = ttk.Scrollbar(
-            log_container, orient=tk.VERTICAL, command=self.log_text.yview
+        log_scroll = ttk.Scrollbar(
+            log_container, orient="vertical", command=self.log_text.yview
         )
-        self.log_text.configure(yscrollcommand=scrollbar.set)
+        self.log_text.configure(yscrollcommand=log_scroll.set)
 
-        self.log_text.grid(
-            row=0, column=0, sticky="nsew", padx=(0, 5)
-        )  # Padding derecho para el scrollbar
-        scrollbar.grid(row=0, column=1, sticky="ns")
+        self.log_text.grid(row=0, column=0, sticky="nsew")
+        log_scroll.grid(row=0, column=1, sticky="ns")
 
-        # Configurar colores para diferentes tipos de mensajes
-        self.log_text.tag_configure("info", foreground="black")
-        self.log_text.tag_configure("error", foreground="red")
-        self.log_text.tag_configure("success", foreground="green")
+        # MEJORA: Configurar colores para el log usando UI_CONFIG
+        self.log_text.tag_configure(
+            "info", foreground=UI_CONFIG["theme"]["colors"].get("info_text", "black")
+        )  # Usar un color específico para info si existe
+        self.log_text.tag_configure(
+            "error", foreground=UI_CONFIG["theme"]["colors"]["error"]
+        )
+        self.log_text.tag_configure(
+            "success", foreground=UI_CONFIG["theme"]["colors"]["success"]
+        )
+        self.log_text.tag_configure(
+            "warning", foreground=UI_CONFIG["theme"]["colors"]["warning"]
+        )
 
-    def on_window_resize(self, event):
-        """Maneja el redimensionamiento de la ventana"""
-        # Ajustar el tamaño de las columnas del árbol
-        tree_width = self.dir_tree.winfo_width()
-        self.dir_tree.column("#0", width=int(tree_width * 0.4))
-        self.dir_tree.column("path", width=int(tree_width * 0.6))
+    def on_window_resize(self, event=None):  # Permitir llamar sin evento
+        # Solo ajustar si la ventana ya tiene un tamaño (evitar errores al inicio)
+        if self.root.winfo_width() > 1 and self.dir_tree.winfo_width() > 1:
+            tree_width = self.dir_tree.winfo_width()
+            # Asegurarse de que las columnas no sean demasiado pequeñas
+            col_0_width = int(tree_width * 0.4)
+            col_1_width = int(tree_width * 0.6)
+
+            if col_0_width < 100:
+                col_0_width = 100  # Mínimo para Nombre
+            if col_1_width < 150:
+                col_1_width = 150  # Mínimo para Ruta
+
+            self.dir_tree.column("#0", width=col_0_width)
+            self.dir_tree.column("path", width=col_1_width)
 
     def load_initial_directories(self):
-        """Carga los directorios iniciales en el árbol"""
-        # Directorios comunes para buscar
         common_dirs = {
             "Home": os.path.expanduser("~"),
             "Documentos": os.path.expanduser("~/Documents"),
             "Descargas": os.path.expanduser("~/Downloads"),
             "Escritorio": os.path.expanduser("~/Desktop"),
+            "Imágenes": os.path.expanduser("~/Pictures"),
+            "Música": os.path.expanduser("~/Music"),
+            "Vídeos": os.path.expanduser("~/Videos"),
             "Sistema": {"Raíz": "/", "Montajes": "/mnt", "Usuarios": "/home"},
         }
 
-        # Limpiar el árbol
         for item in self.dir_tree.get_children():
             self.dir_tree.delete(item)
 
-        # Añadir directorios principales
-        for name, path in common_dirs.items():
-            if isinstance(path, dict):
-                # Crear categoría principal
-                parent = self.dir_tree.insert("", "end", text=name, values=("",))
-                # Añadir subdirectorios
-                for subname, subpath in path.items():
-                    if os.path.exists(subpath):
+        for name, path_or_dict in common_dirs.items():
+            if isinstance(path_or_dict, dict):
+                parent_id = self.dir_tree.insert(
+                    "", "end", text=name, values=("",), open=False
+                )  # No abrir por defecto
+                for sub_name, sub_path in path_or_dict.items():
+                    if os.path.exists(sub_path) and os.path.isdir(sub_path):
                         self.dir_tree.insert(
-                            parent, "end", text=subname, values=(subpath,)
+                            parent_id, "end", text=sub_name, values=(sub_path,)
                         )
-            elif os.path.exists(path):
-                self.dir_tree.insert("", "end", text=name, values=(path,))
+            elif (
+                isinstance(path_or_dict, str)
+                and os.path.exists(path_or_dict)
+                and os.path.isdir(path_or_dict)
+            ):
+                self.dir_tree.insert("", "end", text=name, values=(path_or_dict,))
 
-        # Expandir el árbol
-        for item in self.dir_tree.get_children():
-            self.dir_tree.item(item, open=True)
+        # Llamar a on_window_resize una vez después de cargar para ajustar columnas
+        self.root.after(100, self.on_window_resize)
 
     def add_directory_to_tree(self, dir_path, parent=""):
-        """Añade un directorio al árbol con mejor organización"""
         try:
-            # Obtener el nombre del directorio
-            dir_name = os.path.basename(dir_path)
-            if not dir_name:  # Si es la raíz
-                dir_name = dir_path
+            dir_name = os.path.basename(dir_path) or dir_path
+            # Evitar duplicados si ya existe con la misma ruta
+            for item_id in self.dir_tree.get_children(parent):
+                if (
+                    self.dir_tree.item(item_id, "values")
+                    and self.dir_tree.item(item_id, "values")[0] == dir_path
+                ):
+                    self.dir_tree.selection_set(item_id)  # Seleccionar el existente
+                    self.dir_tree.focus(item_id)
+                    return
 
-            # Insertar en el árbol
             item = self.dir_tree.insert(
-                parent, "end", text=dir_name, values=(dir_path,)
+                parent, "end", text=dir_name, values=(dir_path,), open=True
             )
+            self.dir_tree.selection_set(item)
+            self.dir_tree.focus(item)
 
-            # Intentar cargar subdirectorios (hasta un nivel)
-            try:
-                for subdir in os.listdir(dir_path):
-                    subdir_path = os.path.join(dir_path, subdir)
-                    if os.path.isdir(subdir_path) and not subdir.startswith("."):
-                        self.dir_tree.insert(
-                            item, "end", text=subdir, values=(subdir_path,)
-                        )
-            except PermissionError:
-                # Ignorar errores de permisos al listar subdirectorios
-                pass
+            # Opcional: Cargar un nivel de subdirectorios (puede ser lento para directorios grandes)
+            # for sub_item in os.listdir(dir_path):
+            #     sub_item_path = os.path.join(dir_path, sub_item)
+            #     if os.path.isdir(sub_item_path) and not sub_item.startswith("."):
+            #         self.dir_tree.insert(item, "end", text=sub_item, values=(sub_item_path,))
 
         except Exception as e:
-            logging.error(f"Error al añadir directorio al árbol: {e}")
+            logging.error(f"Error al añadir directorio al árbol: {dir_path}, {e}")
+            self.add_log_message(f"Error al acceder a {dir_path}: {e}", "error")
 
     def refresh_directories(self):
-        """Actualiza la lista de directorios"""
-        # Limpiar el árbol
-        for item in self.dir_tree.get_children():
-            self.dir_tree.delete(item)
-
-        # Recargar directorios
         self.load_initial_directories()
-        self.add_log_message("Lista de directorios actualizada", "info")
+        self.add_log_message("Lista de directorios actualizada.", "info")
 
     def browse_directory(self):
-        """Abre un diálogo para seleccionar un directorio personalizado"""
-        directory = filedialog.askdirectory()
+        directory = filedialog.askdirectory(
+            initialdir=self.source_dir_var.get() or os.path.expanduser("~")
+        )
         if directory:
             self.source_dir_var.set(directory)
-            self.add_directory_to_tree(directory)
-            self.add_log_message(f"Directorio añadido: {directory}", "success")
+            self.add_directory_to_tree(directory)  # Añadirlo al árbol
+            self.add_log_message(
+                f"Directorio seleccionado para organizar: {directory}", "success"
+            )
 
     def on_tree_select(self, event):
-        """Maneja la selección de un directorio en el árbol"""
         selected_items = self.dir_tree.selection()
         if selected_items:
             item = selected_items[0]
-            dir_path = self.dir_tree.item(item)["values"][0]
-            if dir_path:  # Solo actualizar si hay una ruta
+            # Asegurarse de que 'values' no esté vacío y tenga al menos un elemento
+            item_values = self.dir_tree.item(item, "values")
+            if item_values and item_values[0]:
+                dir_path = item_values[0]
                 self.source_dir_var.set(dir_path)
-                self.add_log_message(f"Directorio seleccionado: {dir_path}", "info")
+                # No es necesario un log aquí, es muy verboso. El log es más útil para acciones.
+            # else:
+            # Es una categoría padre sin ruta, no hacer nada o limpiar el entry.
+            # self.source_dir_var.set("")
 
     def add_log_message(self, message, message_type="info"):
-        """Añade un mensaje al área de log con formato y color según el tipo"""
         self.log_text.config(state=tk.NORMAL)
         timestamp = datetime.now().strftime("%H:%M:%S")
-        formatted_message = f"{timestamp} - {message}\n"
 
-        self.log_text.insert(tk.END, formatted_message, message_type)
+        # Si el mensaje es una lista (de FileOrganizer), unirla
+        if isinstance(message, list):
+            message = "\n".join(message)
+
+        # Dividir el mensaje en líneas para aplicar el tag a cada una si es multilínea
+        lines = message.split("\n")
+        for line in lines:
+            if line.strip():  # Evitar líneas vacías o solo con espacios
+                formatted_message = f"{timestamp} - {line}\n"
+                self.log_text.insert(tk.END, formatted_message, message_type)
+
         self.log_text.see(tk.END)
         self.log_text.config(state=tk.DISABLED)
 
@@ -517,7 +678,7 @@ class App:
 
     def update_progress(self, value):
         self.progress_var.set(value)
-        self.root.update_idletasks()
+        self.root.update_idletasks()  # Forzar actualización de la UI
 
     def start_organization(self):
         source_dir = self.source_dir_var.get()
@@ -527,50 +688,84 @@ class App:
                 "Por favor, selecciona un directorio para organizar.",
             )
             return
+        if not os.path.isdir(source_dir):
+            messagebox.showerror(
+                "Directorio Inválido",
+                f"La ruta '{source_dir}' no es un directorio válido.",
+            )
+            return
 
         self.clear_log()
         self.progress_var.set(0)
-        self.add_log_message(f"Iniciando organización en: {source_dir}")
+        # El mensaje inicial de organización ya se añade en FileOrganizer
 
         confirm = messagebox.askyesno(
             "Confirmar Organización",
             f"¿Estás seguro de que deseas organizar los archivos en '{source_dir}'?\n"
             "Esta acción moverá los archivos a nuevas subcarpetas.\n"
             "Es recomendable hacer una copia de seguridad antes de proceder.",
+            icon="warning",  # Icono para el messagebox
         )
 
         if not confirm:
-            self.add_log_message("Organización cancelada por el usuario.")
+            self.add_log_message("Organización cancelada por el usuario.", "warning")
             return
 
         try:
-            files_moved, folders_created, log_details = (
+            # Deshabilitar botón mientras se organiza para evitar clics múltiples
+            # Esto requeriría guardar una referencia al botón: self.organize_button.config(state=tk.DISABLED)
+            # Y luego habilitarlo en un bloque finally: self.organize_button.config(state=tk.NORMAL)
+
+            files_moved, folders_created, log_details_str = (
                 self.file_organizer.organize_files(
                     source_dir, progress_callback=self.update_progress
                 )
             )
 
-            self.add_log_message(log_details)
+            # log_details_str ya es una cadena con saltos de línea
+            self.add_log_message(
+                log_details_str
+            )  # Se aplicarán tags según el contenido si se mejora FileOrganizer
 
+            # Determinar el tipo de mensaje final basado en los resultados
             if files_moved > 0 or folders_created > 0:
-                messagebox.showinfo(
-                    "Organización Completa",
+                final_summary = (
                     f"Proceso finalizado.\n\n"
                     f"Archivos movidos: {files_moved}\n"
                     f"Carpetas creadas: {folders_created}\n\n"
-                    f"Revisa el registro para más detalles.",
+                    f"Revisa el registro para más detalles."
                 )
-            else:
+                messagebox.showinfo("Organización Completa", final_summary)
+
+            elif (
+                self.file_organizer.log_messages
+                and "No se encontraron archivos para organizar."
+                in self.file_organizer.log_messages[-1]
+            ):
+                messagebox.showinfo(
+                    "Organización",
+                    "No se encontraron archivos en el directorio especificado.",
+                )
+
+            elif (
+                self.file_organizer.log_messages
+                and "Organización cancelada" not in self.file_organizer.log_messages[-1]
+            ):
                 messagebox.showinfo(
                     "Organización Completa",
-                    "No se movieron archivos ni se crearon carpetas nuevas.",
+                    "No se realizaron cambios. Los archivos podrían estar ya organizados o no hubo archivos que mover.",
                 )
 
         except Exception as e:
-            error_msg = f"Error inesperado: {str(e)}"
-            self.add_log_message(error_msg, message_type="error")
-            messagebox.showerror("Error", error_msg)
-            logging.error(error_msg)
+            error_msg = f"Error crítico durante la organización: {str(e)}"
+            self.add_log_message(error_msg, "error")
+            messagebox.showerror("Error Crítico", error_msg)
+            logging.exception(
+                error_msg
+            )  # Usar logging.exception para incluir traceback
+        finally:
+            self.progress_var.set(100)  # Asegurar que la barra llegue al final
+            # Habilitar botón de organizar si se deshabilitó
 
 
 if __name__ == "__main__":
