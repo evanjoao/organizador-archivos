@@ -101,20 +101,20 @@ An advanced file organization application developed in Python with Tkinter, feat
 
 ## 🔧 Installation
 
-1. **Clone the repository**:
+1.**Clone the repository**:
 
 ```bash
 git clone https://github.com/evanjoao/organizador-archivos.git
 cd organizador-archivos
 ```
 
-2. **Verify Python**:
+2.**Verify Python**:
 
 ```bash
 python --version  # Should be 3.6+
 ```
 
-3. **Run the application**:
+3.**Run the application**:
 
 ```bash
 python app.py
