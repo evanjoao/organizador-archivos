@@ -48,7 +48,7 @@ class FileOrganizer:
                 if os.path.isfile(os.path.join(source_directory, f))
             ]
 
-            # Aplicar filtros
+            # Apply filters
             filtered_files = self.file_filter.apply_filters(all_files, source_directory)
             return filtered_files
 
@@ -75,7 +75,7 @@ class FileOrganizer:
         self.folders_created_count = 0
         self.log_messages = [f"Starting organization in: {source_directory}"]
 
-        # Para el sistema de deshacer
+        # For the undo system
         operation_moves = []
         folders_created = []
 
@@ -131,7 +131,7 @@ class FileOrganizer:
                     shutil.move(item_path, destination_file_path)
                     self.files_moved_count += 1
 
-                    # Registrar el movimiento para deshacer
+                    # Record the movement for undo
                     if create_operation_record:
                         operation_moves.append(
                             {
@@ -149,7 +149,7 @@ class FileOrganizer:
                     self.log_messages.append(error_msg)
                     logging.error(error_msg)
 
-            # Guardar operación para deshacer
+            # Save operation for undo
             if create_operation_record and (
                 self.files_moved_count > 0 or self.folders_created_count > 0
             ):
@@ -201,7 +201,7 @@ class App:
             (UI_CONFIG["theme"]["font_family"], UI_CONFIG["theme"]["font_size"]),
         )
 
-        # Inicializar componentes
+        # Initialize components
         self.settings_manager = SettingsManager()
         self.file_organizer = FileOrganizer(self.settings_manager)
         self.preview_manager = PreviewManager(self.file_organizer)
@@ -875,7 +875,7 @@ class App:
             # Enable organize button if it was disabled
 
     def open_settings(self):
-        """Abre la ventana de configuración de categorías."""
+        """Opens the category configuration window."""
 
         def on_settings_saved():
             self.add_log_message("Settings updated successfully.", "success")
@@ -885,7 +885,7 @@ class App:
         SettingsWindow(self.root, self.settings_manager, callback=on_settings_saved)
 
     def open_filters(self):
-        """Abre la ventana de filtros avanzados."""
+        """Opens the advanced filters window."""
 
         def on_filters_applied():
             total_files = len(
@@ -905,7 +905,7 @@ class App:
         )
 
     def preview_organization(self):
-        """Muestra una previsualización de los cambios que se realizarían."""
+        """Shows a preview of the changes that would be made."""
         source_dir = self.source_dir_var.get()
         if not source_dir:
             messagebox.showwarning(
@@ -937,7 +937,7 @@ class App:
         PreviewWindow(self.root, preview_data, callback=on_preview_decision)
 
     def start_organization_direct(self):
-        """Inicia la organización directamente sin confirmación adicional."""
+        """Starts organization directly without additional confirmation."""
         source_dir = self.source_dir_var.get()
 
         self.clear_log()
@@ -983,11 +983,11 @@ class App:
                 self.organize_button.config(state=tk.NORMAL)
 
     def open_undo_window(self):
-        """Abre la ventana de gestión de operaciones de deshacer."""
+        """Opens the undo operations management window."""
         UndoWindow(self.root, self.undo_manager)
 
     def show_file_statistics(self):
-        """Muestra estadísticas de los archivos en el directorio seleccionado."""
+        """Shows statistics of files in the selected directory."""
         source_dir = self.source_dir_var.get()
         if not source_dir or not os.path.isdir(source_dir):
             messagebox.showwarning("Warning", "Please select a valid directory first.")
@@ -1076,7 +1076,7 @@ class App:
             messagebox.showerror("Error", f"Error calculating statistics: {e}")
 
     def format_file_size(self, size_bytes):
-        """Formatea el tamaño del archivo de manera legible."""
+        """Formats the file size in a readable way."""
         if size_bytes < 1024:
             return f"{size_bytes} B"
         elif size_bytes < 1024**2:

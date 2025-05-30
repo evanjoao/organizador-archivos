@@ -1,351 +1,351 @@
 # File Organizer - Advanced Version
 
-Una aplicación avanzada de organización de archivos desarrollada en Python con Tkinter, con funcionalidades extendidas de personalización, filtrado y control de cambios.
+An advanced file organization application developed in Python with Tkinter, featuring extended customization, filtering, and change control capabilities.
 
-## 🚀 Características Principales
+## 🚀 Main Features
 
-### 🔧 Gestión de Configuraciones Personalizable
+### 🔧 Customizable Configuration Management
 
-- **Categorías personalizadas**: Define tus propias categorías de archivos y asigna extensiones
-- **Configuración persistente**: Las configuraciones se guardan automáticamente en `settings.json`
-- **Interfaz intuitiva**: Ventana dedicada para gestionar categorías y extensiones
-- **Editor de categorías**: Agrega, edita y elimina categorías fácilmente
+- **Custom categories**: Define your own file categories and assign extensions
+- **Persistent configuration**: Settings are automatically saved in `settings.json`
+- **Intuitive interface**: Dedicated window for managing categories and extensions
+- **Category editor**: Add, edit, and delete categories easily
 
-### 🔍 Sistema de Filtros Avanzados
+### 🔍 Advanced Filtering System
 
-- **Filtro por extensión**: Selecciona tipos específicos de archivos
-- **Filtro por tamaño**: Define rangos de tamaño (KB, MB, GB)
-- **Filtro por fecha**: Filtra por fecha de modificación o creación
-- **Filtro por nombre**: Búsqueda por patrones en nombres de archivo
-- **Filtro por categoría**: Organiza según categorías personalizadas
-- **Combinación de filtros**: Usa múltiples criterios simultáneamente
+- **Extension filter**: Select specific file types
+- **Size filter**: Define size ranges (KB, MB, GB)
+- **Date filter**: Filter by modification or creation date
+- **Name filter**: Search by patterns in file names
+- **Category filter**: Organize according to custom categories
+- **Filter combination**: Use multiple criteria simultaneously
 
-### 👁️ Sistema de Previsualización
+### 👁️ Preview System
 
-- **Vista previa detallada**: Ve exactamente qué archivos se moverán y a dónde
-- **Información completa**: Tamaño, fecha de modificación, destino
-- **Vista de árbol**: Organización jerárquica de archivos y carpetas de destino
-- **Confirmación antes de ejecutar**: Previene errores de organización
+- **Detailed preview**: See exactly which files will be moved and where
+- **Complete information**: Size, modification date, destination
+- **Tree view**: Hierarchical organization of files and destination folders
+- **Confirmation before execution**: Prevents organization errors
 
-### ↩️ Sistema de Deshacer Operaciones
+### ↩️ Undo Operations System
 
-- **Historial completo**: Registro de todas las operaciones realizadas
-- **Deshacer selectivo**: Revierte operaciones específicas
-- **Información detallada**: Ve qué archivos fueron movidos en cada operación
-- **Persistencia**: El historial se guarda en `undo_history.json`
+- **Complete history**: Record of all operations performed
+- **Selective undo**: Revert specific operations
+- **Detailed information**: See which files were moved in each operation
+- **Persistence**: History is saved in `undo_history.json`
 
-### 📊 Estadísticas de Archivos
+### 📊 File Statistics
 
-- **Conteo por categoría**: Cuántos archivos hay de cada tipo
-- **Información de tamaño**: Espacio ocupado por categoría
-- **Análisis del directorio**: Vista general del contenido
-- **Distribución visual**: Resumen claro de la composición del directorio
+- **Count by category**: How many files of each type
+- **Size information**: Space occupied by category
+- **Directory analysis**: General view of content
+- **Visual distribution**: Clear summary of directory composition
 
-### 🎨 Interfaz Moderna
+### 🎨 Modern Interface
 
-- Interfaz gráfica moderna y fácil de usar (Tkinter + ttk con estilos personalizados)
-- Organización automática de archivos por tipo
-- Soporte para múltiples tipos de archivo
-- Visualización de progreso en tiempo real
-- Log detallado de operaciones con mensajes codificados por colores
-- Navegación intuitiva de directorios
-- Compatible con Windows, Linux y macOS
+- Modern and easy-to-use graphical interface (Tkinter + ttk with custom styles)
+- Automatic file organization by type
+- Support for multiple file types
+- Real-time progress visualization
+- Detailed operation log with color-coded messages
+- Intuitive directory navigation
+- Compatible with Windows, Linux, and macOS
 
-## 🎛️ Nuevos Controles de la Interfaz
+## 🎛️ New Interface Controls
 
-### Botones de Control Principal
+### Main Control Buttons
 
-- **Settings**: Abre la ventana de configuración de categorías
-- **Filters**: Configura filtros avanzados para la organización
-- **Preview**: Muestra una vista previa de los cambios antes de aplicarlos
-- **Organize**: Ejecuta la organización de archivos
-- **Undo**: Abre la ventana de historial para deshacer operaciones
-- **Statistics**: Muestra estadísticas detalladas del directorio
+- **Settings**: Opens the category configuration window
+- **Filters**: Configures advanced filters for organization
+- **Preview**: Shows a preview of changes before applying them
+- **Organize**: Executes file organization
+- **Undo**: Opens the history window to undo operations
+- **Statistics**: Shows detailed directory statistics
 
-### Ventanas Especializadas
+### Specialized Windows
 
-#### Ventana de Configuraciones
+#### Settings Window
 
-- Lista de todas las categorías disponibles
-- Botones para agregar, editar y eliminar categorías
-- Editor de extensiones para cada categoría
-- Guardado automático de cambios
+- List of all available categories
+- Buttons to add, edit, and delete categories
+- Extension editor for each category
+- Automatic saving of changes
 
-#### Ventana de Filtros
+#### Filters Window
 
-- Múltiples tipos de filtros configurables
-- Vista previa en tiempo real de archivos que coinciden
-- Aplicación y limpieza de filtros
-- Combinación de criterios
+- Multiple configurable filter types
+- Real-time preview of matching files
+- Application and clearing of filters
+- Combination of criteria
 
-#### Ventana de Previsualización
+#### Preview Window
 
-- Vista de árbol que muestra la estructura de destino
-- Información detallada de cada archivo
-- Confirmación antes de proceder
-- Cancelación segura
+- Tree view showing target structure
+- Detailed information for each file
+- Confirmation before proceeding
+- Safe cancellation
 
-#### Ventana de Deshacer
+#### Undo Window
 
-- Historial cronológico de operaciones
-- Información detallada de cada operación
-- Selección y reversión de operaciones específicas
-- Validación antes de deshacer
+- Chronological history of operations
+- Detailed information for each operation
+- Selection and reversal of specific operations
+- Validation before undoing
 
-## 📋 Requisitos del Sistema
+## 📋 System Requirements
 
-- **Python**: 3.6 o superior
-- **Tkinter**: Incluido en la mayoría de instalaciones de Python
-- **Sistema Operativo**: Windows, Linux o macOS
-- **Espacio en disco**: Mínimo para archivos de configuración e historial
+- **Python**: 3.6 or higher
+- **Tkinter**: Included in most Python installations
+- **Operating System**: Windows, Linux, or macOS
+- **Disk Space**: Minimal for configuration and history files
 
-## 🔧 Instalación
+## 🔧 Installation
 
-1.**Clona el repositorio**:
+1. **Clone the repository**:
 
 ```bash
 git clone https://github.com/evanjoao/organizador-archivos.git
 cd organizador-archivos
 ```
 
-2.**Verifica Python**:
+2. **Verify Python**:
 
 ```bash
-python --version  # Debe ser 3.6+
+python --version  # Should be 3.6+
 ```
 
-3.**Ejecuta la aplicación**:
+3. **Run the application**:
 
 ```bash
 python app.py
 ```
 
-> **Nota**: No se requieren dependencias adicionales más allá de Python y Tkinter.
+> **Note**: No additional dependencies are required beyond Python and Tkinter.
 
-## 📖 Guía de Uso
+## 📖 Usage Guide
 
-### 🔰 Uso Básico
+### 🔰 Basic Usage
 
-1. **Inicia la aplicación**:
+1. **Start the application**:
 
    ```bash
    python app.py
    ```
 
-2. **Selecciona un directorio** usando el botón "Browse" o el árbol de directorios
+2. **Select a directory** using the "Browse" button or the directory tree
 
-3. **Organiza archivos**:
-   - Haz clic directamente en "Organize" para usar configuraciones por defecto
-   - O sigue el flujo avanzado para mayor control
+3. **Organize files**:
+   - Click directly on "Organize" to use default settings
+   - Or follow the advanced workflow for greater control
 
-### 🎯 Uso Avanzado
+### 🎯 Advanced Usage
 
-#### 1. Configurar Categorías Personalizadas
+#### 1. Configure Custom Categories
 
-- Haz clic en **Settings**
-- Usa "Add Category" para crear nuevas categorías
-- Edita categorías existentes con "Edit Category"
-- Asigna extensiones específicas a cada categoría
-- Los cambios se guardan automáticamente
+- Click on **Settings**
+- Use "Add Category" to create new categories
+- Edit existing categories with "Edit Category"
+- Assign specific extensions to each category
+- Changes are saved automatically
 
-#### 2. Aplicar Filtros Específicos
+#### 2. Apply Specific Filters
 
-- Haz clic en **Filters**
-- Configura filtros por:
-  - **Extensión**: Selecciona tipos específicos
-  - **Tamaño**: Define rangos mínimos y máximos
-  - **Fecha**: Filtra por fecha de modificación
-  - **Nombre**: Usa patrones de búsqueda
-  - **Categoría**: Filtra por categorías específicas
-- Aplica los filtros antes de organizar
+- Click on **Filters**
+- Configure filters by:
+  - **Extension**: Select specific types
+  - **Size**: Define minimum and maximum ranges
+  - **Date**: Filter by modification date
+  - **Name**: Use search patterns
+  - **Category**: Filter by specific categories
+- Apply filters before organizing
 
-#### 3. Previsualizar Cambios
+#### 3. Preview Changes
 
-- Haz clic en **Preview** después de configurar filtros
-- Revisa la vista de árbol que muestra:
-  - Qué archivos se moverán
-  - A qué carpetas irán
-  - Información detallada de cada archivo
-- Confirma los cambios o cancela para ajustar
+- Click on **Preview** after configuring filters
+- Review the tree view that shows:
+  - Which files will be moved
+  - Which folders they will go to
+  - Detailed information for each file
+- Confirm changes or cancel to adjust
 
-#### 4. Gestionar Historial de Operaciones
+#### 4. Manage Operation History
 
-- Usa **Undo** para ver todas las operaciones realizadas
-- Selecciona operaciones específicas para revertir
-- Ve información detallada de cada operación
-- Confirma antes de deshacer cambios
+- Use **Undo** to see all operations performed
+- Select specific operations to revert
+- View detailed information for each operation
+- Confirm before undoing changes
 
-#### 5. Analizar Directorios
+#### 5. Analyze Directories
 
-- Haz clic en **Statistics** para ver:
-  - Distribución de archivos por categoría
-  - Conteo de archivos de cada tipo
-  - Tamaño total por categoría
-  - Resumen general del directorio
+- Click on **Statistics** to see:
+  - File distribution by category
+  - Count of files of each type
+  - Total size by category
+  - General directory summary
 
-## 📁 Estructura del Proyecto
+## 📁 Project Structure
 
 ```text
 App/
-├── app.py                    # Aplicación principal
-├── config.py                 # Configuraciones base y categorías por defecto
-├── settings_manager.py       # Sistema de gestión de configuraciones
-├── preview_undo.py          # Sistema de previsualización y deshacer
-├── filters.py               # Sistema de filtros avanzados
-├── settings.json            # Configuraciones personalizadas (auto-generado)
-├── undo_history.json        # Historial de operaciones (auto-generado)
-└── README.md               # Este archivo
+├── app.py                    # Main application
+├── config.py                 # Base configurations and default categories
+├── settings_manager.py       # Configuration management system
+├── preview_undo.py          # Preview and undo system
+├── filters.py               # Advanced filtering system
+├── settings.json            # Custom configurations (auto-generated)
+├── undo_history.json        # Operation history (auto-generated)
+└── README.md               # This file
 ```
 
-### Descripción de Archivos
+### File Descriptions
 
-- **app.py**: Archivo principal que contiene la interfaz de usuario y la lógica de organización
-- **config.py**: Definiciones de categorías por defecto y configuraciones básicas
-- **settings_manager.py**: Manejo de configuraciones personalizadas y ventana de configuración
-- **preview_undo.py**: Sistema de previsualización y gestión del historial de operaciones
-- **filters.py**: Sistema de filtros avanzados con múltiples criterios
-- **settings.json**: Archivo generado automáticamente para guardar configuraciones del usuario
-- **undo_history.json**: Archivo generado automáticamente para guardar el historial de operaciones
+- **app.py**: Main file containing the user interface and organization logic
+- **config.py**: Default category definitions and basic configurations
+- **settings_manager.py**: Custom configuration management and configuration window
+- **preview_undo.py**: Preview system and operation history management
+- **filters.py**: Advanced filtering system with multiple criteria
+- **settings.json**: Auto-generated file to save user configurations
+- **undo_history.json**: Auto-generated file to save operation history
 
-## 🗂️ Categorías por Defecto
+## 🗂️ Default Categories
 
-### Documentos
+### Documents
 
-- **.pdf, .doc, .docx**: Documentos de texto
-- **.txt, .rtf, .odt**: Archivos de texto plano y procesadores
-- **.xls, .xlsx, .ppt, .pptx**: Hojas de cálculo y presentaciones
+- **.pdf, .doc, .docx**: Text documents
+- **.txt, .rtf, .odt**: Plain text files and word processors
+- **.xls, .xlsx, .ppt, .pptx**: Spreadsheets and presentations
 
-### Imágenes
+### Images
 
-- **.jpg, .jpeg, .png**: Formatos de imagen comunes
-- **.gif, .bmp, .svg**: Formatos de imagen adicionales
-- **.webp, .tiff**: Formatos de imagen modernos
+- **.jpg, .jpeg, .png**: Common image formats
+- **.gif, .bmp, .svg**: Additional image formats
+- **.webp, .tiff**: Modern image formats
 
 ### Videos
 
-- **.mp4, .avi, .mkv**: Formatos de video populares
-- **.mov, .wmv, .flv**: Formatos de video adicionales
-- **.webm, .m4v**: Formatos de video modernos
+- **.mp4, .avi, .mkv**: Popular video formats
+- **.mov, .wmv, .flv**: Additional video formats
+- **.webm, .m4v**: Modern video formats
 
 ### Audio
 
-- **.mp3, .wav, .flac**: Formatos de audio comunes
-- **.aac, .ogg, .wma**: Formatos de audio adicionales
-- **.m4a**: Formato de audio moderno
+- **.mp3, .wav, .flac**: Common audio formats
+- **.aac, .ogg, .wma**: Additional audio formats
+- **.m4a**: Modern audio format
 
-### Archivos Comprimidos
+### Compressed Files
 
-- **.zip, .rar, .7z**: Compresores populares
-- **.tar, .gz, .bz2**: Compresores Unix/Linux
+- **.zip, .rar, .7z**: Popular compressors
+- **.tar, .gz, .bz2**: Unix/Linux compressors
 
-### Código
+### Code
 
-- **.py, .js, .html, .css**: Lenguajes web y Python
-- **.java, .cpp, .c**: Lenguajes compilados
-- **.json, .xml, .yaml**: Archivos de configuración
+- **.py, .js, .html, .css**: Web languages and Python
+- **.java, .cpp, .c**: Compiled languages
+- **.json, .xml, .yaml**: Configuration files
 
-### Ejecutables
+### Executables
 
-- **.exe, .msi**: Ejecutables Windows
-- **.deb, .rpm**: Paquetes Linux
-- **.dmg, .app**: Archivos macOS
+- **.exe, .msi**: Windows executables
+- **.deb, .rpm**: Linux packages
+- **.dmg, .app**: macOS files
 
-## 🛡️ Características de Seguridad
+## 🛡️ Security Features
 
-- **Validación de archivos**: Verificación antes de mover archivos
-- **Historial de operaciones**: Registro completo para deshacer cambios
-- **Previsualización**: Confirmación antes de realizar cambios
-- **Manejo de errores**: Gestión robusta de errores de archivo
-- **Respaldos implícitos**: El sistema de deshacer actúa como respaldo
+- **File validation**: Verification before moving files
+- **Operation history**: Complete record to undo changes
+- **Preview**: Confirmation before making changes
+- **Error handling**: Robust file error management
+- **Implicit backups**: The undo system acts as a backup
 
-## 🎨 Personalización
+## 🎨 Customization
 
-### Crear Categorías Personalizadas
+### Create Custom Categories
 
-1. Abre **Settings**
-2. Haz clic en "Add Category"
-3. Ingresa el nombre de la categoría
-4. Agrega extensiones separadas por comas
-5. Confirma para guardar
+1. Open **Settings**
+2. Click on "Add Category"
+3. Enter the category name
+4. Add extensions separated by commas
+5. Confirm to save
 
-### Modificar Categorías Existentes
+### Modify Existing Categories
 
-1. Selecciona una categoría en la lista
-2. Haz clic en "Edit Category"
-3. Modifica el nombre o las extensiones
-4. Los cambios se guardan automáticamente
+1. Select a category from the list
+2. Click on "Edit Category"
+3. Modify the name or extensions
+4. Changes are saved automatically
 
-### Eliminar Categorías
+### Delete Categories
 
-1. Selecciona la categoría a eliminar
-2. Haz clic en "Delete Category"
-3. Confirma la eliminación
+1. Select the category to delete
+2. Click on "Delete Category"
+3. Confirm deletion
 
-## 💡 Consejos de Uso
+## 💡 Usage Tips
 
-### Mejores Prácticas
+### Best Practices
 
-- **Siempre previsualiza**: Usa "Preview" antes de organizar
-- **Configura filtros**: Para trabajar con tipos específicos de archivos
-- **Revisa el historial**: El botón "Undo" te permite deshacer errores
-- **Personaliza categorías**: Adapta las categorías a tus necesidades
-- **Mantén respaldos**: Aunque hay sistema de deshacer, los respaldos son importantes
+- **Always preview**: Use "Preview" before organizing
+- **Configure filters**: To work with specific file types
+- **Review history**: The "Undo" button allows you to undo errors
+- **Customize categories**: Adapt categories to your needs
+- **Keep backups**: Although there's an undo system, backups are important
 
-### Flujo de Trabajo Recomendado
+### Recommended Workflow
 
-1. **Selecciona el directorio** a organizar
-2. **Configura categorías** personalizadas si es necesario
-3. **Aplica filtros** para trabajar con archivos específicos
-4. **Previsualiza** los cambios
-5. **Ejecuta** la organización
-6. **Revisa** el log de actividad
-7. **Usa Statistics** para analizar el resultado
+1. **Select the directory** to organize
+2. **Configure custom categories** if necessary
+3. **Apply filters** to work with specific files
+4. **Preview** the changes
+5. **Execute** the organization
+6. **Review** the activity log
+7. **Use Statistics** to analyze the result
 
-## 🔮 Desarrollo Futuro
+## 🔮 Future Development
 
-### Funcionalidades Planeadas
+### Planned Features
 
-- **Modo batch**: Organización de múltiples directorios
-- **Integración cloud**: Soporte para servicios de almacenamiento en la nube
-- **Sistema de plugins**: Extensiones personalizadas
-- **Temas adicionales**: Más opciones de personalización visual
-- **Programación de tareas**: Organización automática programada
-- **Reglas avanzadas**: Lógica de organización más compleja
+- **Batch mode**: Organization of multiple directories
+- **Cloud integration**: Support for cloud storage services
+- **Plugin system**: Custom extensions
+- **Additional themes**: More visual customization options
+- **Task scheduling**: Scheduled automatic organization
+- **Advanced rules**: More complex organization logic
 
-### Contribuciones
+### Contributing
 
-Las contribuciones son bienvenidas. Para contribuir:
+Contributions are welcome. To contribute:
 
-1. **Fork** el proyecto
-2. **Crea una rama** para tu feature (`git checkout -b feature/AmazingFeature`)
-3. **Commit** tus cambios (`git commit -m 'Add some AmazingFeature'`)
-4. **Push** a la rama (`git push origin feature/AmazingFeature`)
-5. **Abre un Pull Request**
+1. **Fork** the project
+2. **Create a branch** for your feature (`git checkout -b feature/AmazingFeature`)
+3. **Commit** your changes (`git commit -m 'Add some AmazingFeature'`)
+4. **Push** to the branch (`git push origin feature/AmazingFeature`)
+5. **Open a Pull Request**
 
-## 📄 Licencia
+## 📄 License
 
-Este proyecto está bajo la Licencia MIT. Ve el archivo `LICENSE` para más detalles.
+This project is under the MIT License. See the `LICENSE` file for more details.
 
-## 👨‍💻 Autor y Contacto
+## 👨‍💻 Author and Contact
 
 **Evan Joao** - [evanjoaogarciamunoz@gmail.com](mailto:evanjoaogarciamunoz@gmail.com)
 
-**Enlace del Proyecto**: [https://github.com/evanjoao/organizador-archivos](https://github.com/evanjoao/organizador-archivos)
+**Project Link**: [https://github.com/evanjoao/organizador-archivos](https://github.com/evanjoao/organizador-archivos)
 
 ---
 
-### 📊 Resumen de Mejoras
+### 📊 Enhancement Summary
 
-Esta versión avanzada incluye:
+This advanced version includes:
 
-- ✅ **4 nuevos módulos** con funcionalidades especializadas
-- ✅ **6 nuevos botones** de control en la interfaz
-- ✅ **4 ventanas especializadas** para gestión avanzada
-- ✅ **Sistema de configuración** completamente personalizable
-- ✅ **Filtros avanzados** con múltiples criterios
-- ✅ **Previsualización completa** antes de realizar cambios
-- ✅ **Sistema de deshacer** con historial persistente
-- ✅ **Estadísticas detalladas** del directorio
-- ✅ **Interfaz moderna** y funcional
+- ✅ **4 new modules** with specialized functionality
+- ✅ **6 new control buttons** in the interface
+- ✅ **4 specialized windows** for advanced management
+- ✅ **Fully customizable** configuration system
+- ✅ **Advanced filters** with multiple criteria
+- ✅ **Complete preview** before making changes
+- ✅ **Undo system** with persistent history
+- ✅ **Detailed statistics** of the directory
+- ✅ **Modern and functional** interface
 
-La aplicación ha evolucionado de un organizador básico a una herramienta robusta y profesional para la gestión de archivos.
+The application has evolved from a basic organizer to a robust and professional tool for file management.

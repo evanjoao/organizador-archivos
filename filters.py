@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-Sistema de filtros y búsqueda avanzada para el organizador de archivos.
-Permite filtrar archivos por tipo, tamaño, fecha, nombre y otros criterios.
+Advanced filtering and search system for the file organizer.
+Allows filtering files by type, size, date, name and other criteria.
 """
 
 import os
@@ -13,7 +13,7 @@ from tkinter import ttk
 
 
 class FileFilter:
-    """Sistema de filtros para archivos."""
+    """File filtering system."""
 
     def __init__(self):
         self.active_filters = {}
@@ -57,9 +57,9 @@ class FileFilter:
         self.active_filters.clear()
 
 
-# Funciones de filtro predefinidas
+# Predefined filter functions
 def filter_by_extension(filename: str, source_dir: str, extensions: List[str]) -> bool:
-    """Filtra por extensiones de archivo."""
+    """Filters by file extensions."""
     file_ext = os.path.splitext(filename)[1].lower()
     return file_ext in [ext.lower() for ext in extensions]
 
@@ -67,7 +67,7 @@ def filter_by_extension(filename: str, source_dir: str, extensions: List[str]) -
 def filter_by_size(
     filename: str, source_dir: str, min_size: int = 0, max_size: int = None
 ) -> bool:
-    """Filtra por tamaño de archivo en bytes."""
+    """Filters by file size in bytes."""
     file_path = os.path.join(source_dir, filename)
     try:
         file_size = os.path.getsize(file_path)
@@ -87,7 +87,7 @@ def filter_by_date(
     date_to: datetime = None,
     date_type: str = "modified",
 ) -> bool:
-    """Filtra por fecha (modificación, creación o acceso)."""
+    """Filters by date (modification, creation or access)."""
     file_path = os.path.join(source_dir, filename)
     try:
         if date_type == "modified":
@@ -115,7 +115,7 @@ def filter_by_name_pattern(
     regex: bool = False,
     case_sensitive: bool = False,
 ) -> bool:
-    """Filtra por patrón de nombre."""
+    """Filters by name pattern."""
     name = filename if case_sensitive else filename.lower()
     search_pattern = pattern if case_sensitive else pattern.lower()
 
@@ -137,7 +137,7 @@ def filter_exclude_hidden(filename: str, source_dir: str) -> bool:
 def filter_by_category(
     filename: str, source_dir: str, file_organizer, categories: List[str]
 ) -> bool:
-    """Filtra por categoría de archivo."""
+    """Filters by file category."""
     file_ext = os.path.splitext(filename)[1].lower()
     file_category = file_organizer.get_category_for_extension(file_ext)
     return file_category in categories
@@ -165,7 +165,7 @@ class FilterWindow:
         self.window.transient(self.parent)
         self.window.grab_set()
 
-        # Frame principal con scroll
+        # Main frame with scroll
         canvas = tk.Canvas(self.window)
         scrollbar = ttk.Scrollbar(self.window, orient="vertical", command=canvas.yview)
         scrollable_frame = ttk.Frame(canvas)
@@ -180,41 +180,41 @@ class FilterWindow:
         main_frame = ttk.Frame(scrollable_frame, padding="10")
         main_frame.pack(fill="both", expand=True)
 
-        # Título
+        # Title
         ttk.Label(
-            main_frame, text="Configurar Filtros", font=("Arial", 14, "bold")
+            main_frame, text="Configure Filters", font=("Arial", 14, "bold")
         ).pack(anchor="w", pady=(0, 15))
 
-        # Filtro por extensiones
+        # Filter by extensions
         self.create_extension_filter(main_frame)
 
-        # Filtro por tamaño
+        # Filter by size
         self.create_size_filter(main_frame)
 
-        # Filtro por fecha
+        # Filter by date
         self.create_date_filter(main_frame)
 
-        # Filtro por nombre
+        # Filter by name
         self.create_name_filter(main_frame)
 
-        # Filtro por categorías
+        # Filter by categories
         if self.file_organizer:
             self.create_category_filter(main_frame)
 
-        # Filtros varios
+        # Miscellaneous filters
         self.create_misc_filters(main_frame)
 
-        # Botones
+        # Buttons
         button_frame = ttk.Frame(main_frame)
         button_frame.pack(fill="x", pady=(20, 0))
 
-        ttk.Button(
-            button_frame, text="Aplicar Filtros", command=self.apply_filters
-        ).pack(side="right", padx=(5, 0))
-        ttk.Button(button_frame, text="Limpiar Todo", command=self.clear_filters).pack(
+        ttk.Button(button_frame, text="Apply Filters", command=self.apply_filters).pack(
+            side="right", padx=(5, 0)
+        )
+        ttk.Button(button_frame, text="Clear All", command=self.clear_filters).pack(
             side="right"
         )
-        ttk.Button(button_frame, text="Cancelar", command=self.cancel).pack(
+        ttk.Button(button_frame, text="Cancel", command=self.cancel).pack(
             side="right", padx=(0, 5)
         )
 
@@ -263,8 +263,8 @@ class FilterWindow:
         size_frame = ttk.Frame(frame)
         size_frame.pack(fill="x", pady=(10, 0))
 
-        # Tamaño mínimo
-        ttk.Label(size_frame, text="Tamaño mínimo:").grid(row=0, column=0, sticky="w")
+        # Minimum size
+        ttk.Label(size_frame, text="Minimum size:").grid(row=0, column=0, sticky="w")
         self.filter_vars["min_size"] = tk.StringVar()
         ttk.Entry(size_frame, textvariable=self.filter_vars["min_size"], width=15).grid(
             row=0, column=1, padx=(5, 0)
@@ -279,8 +279,8 @@ class FilterWindow:
             state="readonly",
         ).grid(row=0, column=2, padx=(5, 0))
 
-        # Tamaño máximo
-        ttk.Label(size_frame, text="Tamaño máximo:").grid(
+        # Maximum size
+        ttk.Label(size_frame, text="Maximum size:").grid(
             row=1, column=0, sticky="w", pady=(5, 0)
         )
         self.filter_vars["max_size"] = tk.StringVar()
@@ -309,11 +309,11 @@ class FilterWindow:
             variable=self.filter_vars["date_enabled"],
         ).pack(anchor="w")
 
-        # Tipo de fecha
+        # Date type
         type_frame = ttk.Frame(frame)
         type_frame.pack(fill="x", pady=(10, 5))
 
-        ttk.Label(type_frame, text="Tipo de fecha:").pack(side="left")
+        ttk.Label(type_frame, text="Date type:").pack(side="left")
         self.filter_vars["date_type"] = tk.StringVar(value="modified")
         ttk.Combobox(
             type_frame,
@@ -323,19 +323,17 @@ class FilterWindow:
             width=15,
         ).pack(side="left", padx=(10, 0))
 
-        # Rango de fechas
+        # Date range
         date_frame = ttk.Frame(frame)
         date_frame.pack(fill="x")
 
-        ttk.Label(date_frame, text="Desde:").grid(row=0, column=0, sticky="w")
+        ttk.Label(date_frame, text="From:").grid(row=0, column=0, sticky="w")
         self.filter_vars["date_from"] = tk.StringVar()
         ttk.Entry(
             date_frame, textvariable=self.filter_vars["date_from"], width=20
         ).grid(row=0, column=1, padx=(5, 0))
 
-        ttk.Label(date_frame, text="Hasta:").grid(
-            row=1, column=0, sticky="w", pady=(5, 0)
-        )
+        ttk.Label(date_frame, text="To:").grid(row=1, column=0, sticky="w", pady=(5, 0))
         self.filter_vars["date_to"] = tk.StringVar()
         ttk.Entry(date_frame, textvariable=self.filter_vars["date_to"], width=20).grid(
             row=1, column=1, padx=(5, 0), pady=(5, 0)

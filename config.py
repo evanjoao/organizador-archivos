@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Configuración de Tipos de Archivo y Carpetas de Destino
+# File Types and Destination Folders Configuration
 FILE_TYPES = {
-    "Imágenes": [".jpg", ".jpeg", ".png", ".gif", ".bmp", ".tiff", ".svg", ".webp"],
-    "Documentos": [
+    "Images": [".jpg", ".jpeg", ".png", ".gif", ".bmp", ".tiff", ".svg", ".webp"],
+    "Documents": [
         ".pdf",
         ".doc",
         ".docx",
@@ -19,16 +19,16 @@ FILE_TYPES = {
     ],
     "Videos": [".mp4", ".mov", ".avi", ".mkv", ".wmv", ".flv", ".webm"],
     "Audio": [".mp3", ".wav", ".aac", ".ogg", ".flac", ".m4a"],
-    "Archivos Comprimidos": [".zip", ".rar", ".tar", ".gz", ".7z"],
-    "Ejecutables e Instaladores": [".exe", ".msi", ".dmg", ".pkg"],
+    "Compressed Files": [".zip", ".rar", ".tar", ".gz", ".7z"],
+    "Executables and Installers": [".exe", ".msi", ".dmg", ".pkg"],
     "Scripts": [".py", ".js", ".sh", ".bat", ".java", ".c", ".cpp", ".cs"],
-    "Otros": [],  # Para archivos que no coincidan con las categorías anteriores
+    "Others": [],  # For files that don't match previous categories
 }
 
-# Configuración de la interfaz
+# Interface configuration
 UI_CONFIG = {
-    "window_title": "Organizador de Archivos",
-    "window_size": "800x600",  # Ventana más grande
+    "window_title": "File Organizer",
+    "window_size": "800x600",  # Larger window
     "theme": {
         "primary_color": "#2196F3",  # Azul Material Design
         "secondary_color": "#FFC107",  # Amarillo Material Design

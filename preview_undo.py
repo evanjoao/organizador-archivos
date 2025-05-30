@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-Sistema de previsualización y deshacer para el organizador de archivos.
-Permite ver qué archivos se moverán antes de ejecutar la organización
-y deshacer cambios si es necesario.
+Preview and undo system for the file organizer.
+Allows viewing which files will be moved before executing the organization
+and undoing changes if necessary.
 """
 
 import os

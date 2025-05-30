@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-Sistema de configuración personalizable para el organizador de archivos.
-Permite a los usuarios crear, editar y gestionar sus propias categorías de archivos.
+Customizable configuration system for the file organizer.
+Allows users to create, edit and manage their own file categories.
 """
 
 import json

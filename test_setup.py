@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Test script para demostrar las funcionalidades de File Organizer
-Crea archivos de prueba para testing
+Test script to demonstrate File Organizer functionalities
+Creates test files for testing
 """
 
 import os
@@ -12,14 +12,14 @@ import json
 
 
 def create_test_files():
-    """Crea archivos de prueba en un directorio temporal"""
+    """Creates test files in a temporary directory"""
 
-    # Crear directorio de prueba
+    # Create test directory
     test_dir = os.path.expanduser("~/test_organizer")
     if not os.path.exists(test_dir):
         os.makedirs(test_dir)
 
-    # Tipos de archivos para crear
+    # File types to create
     file_types = {
         "documents": [".pdf", ".doc", ".docx", ".txt", ".rtf"],
         "images": [".jpg", ".png", ".gif", ".bmp", ".svg"],
@@ -29,7 +29,7 @@ def create_test_files():
         "code": [".py", ".js", ".html", ".css", ".json"],
     }
 
-    # Nombres base para archivos
+    # Base names for files
     base_names = [
         "report",
         "document",
@@ -51,28 +51,28 @@ def create_test_files():
 
     created_files = []
 
-    print(f"Creando archivos de prueba en: {test_dir}")
+    print(f"Creating test files in: {test_dir}")
 
     for category, extensions in file_types.items():
-        for i in range(3):  # 3 archivos por categoría
-            # Seleccionar nombre y extensión aleatoria
+        for i in range(3):  # 3 files per category
+            # Select random name and extension
             base_name = random.choice(base_names)
             extension = random.choice(extensions)
 
-            # Crear nombre único
+            # Create unique name
             filename = f"{base_name}_{category}_{i+1}{extension}"
             filepath = os.path.join(test_dir, filename)
 
-            # Crear archivo con contenido dummy
+            # Create file with dummy content
             with open(filepath, "w") as f:
-                f.write(f"Archivo de prueba: {filename}\n")
-                f.write(f"Categoría: {category}\n")
-                f.write(f"Creado: {datetime.now()}\n")
-                f.write("Contenido de prueba " * 20)  # Contenido para dar tamaño
+                f.write(f"Test file: {filename}\n")
+                f.write(f"Category: {category}\n")
+                f.write(f"Created: {datetime.now()}\n")
+                f.write("Test content " * 20)  # Content to give size
 
-            # Modificar fecha de algunos archivos para testing de filtros
+            # Modify date of some files for filter testing
             if random.choice([True, False]):
-                # Cambiar fecha de modificación aleatoria
+                # Change modification date randomly
                 days_ago = random.randint(1, 30)
                 old_time = datetime.now() - timedelta(days=days_ago)
                 timestamp = old_time.timestamp()
@@ -80,7 +80,7 @@ def create_test_files():
 
             created_files.append(filepath)
 
-    # Crear algunos archivos adicionales con nombres específicos para testing
+    # Create some additional files with specific names for testing
     special_files = [
         "importante.pdf",
         "foto_vacaciones.jpg",
@@ -92,40 +92,40 @@ def create_test_files():
     for filename in special_files:
         filepath = os.path.join(test_dir, filename)
         with open(filepath, "w") as f:
-            f.write(f"Archivo especial: {filename}\n")
-            f.write("Contenido de prueba específico\n")
+            f.write(f"Special file: {filename}\n")
+            f.write("Specific test content\n")
         created_files.append(filepath)
 
-    print(f"✅ Creados {len(created_files)} archivos de prueba")
-    print(f"📁 Directorio: {test_dir}")
+    print(f"✅ Created {len(created_files)} test files")
+    print(f"📁 Directory: {test_dir}")
 
-    # Mostrar resumen
-    print("\n📊 Resumen de archivos creados:")
+    # Show summary
+    print("\n📊 Summary of created files:")
     file_count = {}
     for filepath in created_files:
         ext = os.path.splitext(filepath)[1].lower()
         file_count[ext] = file_count.get(ext, 0) + 1
 
     for ext, count in sorted(file_count.items()):
-        print(f"   {ext}: {count} archivos")
+        print(f"   {ext}: {count} files")
 
-    print(f"\n🚀 Puedes usar estos archivos para probar File Organizer:")
-    print(f"   1. Ejecuta: python app.py")
-    print(f"   2. Selecciona el directorio: {test_dir}")
-    print(f"   3. Prueba las diferentes funcionalidades")
+    print(f"\n🚀 You can use these files to test File Organizer:")
+    print(f"   1. Run: python app.py")
+    print(f"   2. Select directory: {test_dir}")
+    print(f"   3. Test the different functionalities")
 
     return test_dir, created_files
 
 
 def create_test_config():
-    """Crea una configuración de prueba personalizada"""
+    """Creates a custom test configuration"""
 
     test_config = {
         "categories": {
-            "Documentos Importantes": [".pdf", ".doc", ".docx"],
-            "Fotos Personales": [".jpg", ".jpeg", ".png"],
-            "Código Python": [".py", ".pyw"],
-            "Archivos de Respaldo": [".zip", ".rar", ".7z", ".tar"],
+            "Important Documents": [".pdf", ".doc", ".docx"],
+            "Personal Photos": [".jpg", ".jpeg", ".png"],
+            "Python Code": [".py", ".pyw"],
+            "Backup Files": [".zip", ".rar", ".7z", ".tar"],
             "Multimedia": [".mp4", ".mp3", ".avi", ".wav"],
         }
     }
@@ -134,29 +134,29 @@ def create_test_config():
     with open(config_path, "w", encoding="utf-8") as f:
         json.dump(test_config, f, indent=2, ensure_ascii=False)
 
-    print(f"📋 Configuración de prueba creada: {config_path}")
+    print(f"📋 Test configuration created: {config_path}")
     return config_path
 
 
 if __name__ == "__main__":
-    print("🧪 File Organizer - Script de Prueba")
+    print("🧪 File Organizer - Test Script")
     print("=" * 50)
 
     try:
-        # Crear archivos de prueba
+        # Create test files
         test_dir, files = create_test_files()
 
-        # Crear configuración de prueba
+        # Create test configuration
         config_path = create_test_config()
 
-        print("\n✨ ¡Todo listo para probar File Organizer!")
-        print("\n📝 Sugerencias de prueba:")
-        print("   • Usa Settings para crear categorías personalizadas")
-        print("   • Aplica filtros por tamaño (archivos pequeños/grandes)")
-        print("   • Filtra por fecha (archivos recientes/antiguos)")
-        print("   • Usa Preview para ver cambios antes de aplicar")
-        print("   • Prueba el sistema Undo después de organizar")
-        print("   • Revisa Statistics para ver la distribución")
+        print("\n✨ Everything ready to test File Organizer!")
+        print("\n📝 Test suggestions:")
+        print("   • Use Settings to create custom categories")
+        print("   • Apply size filters (small/large files)")
+        print("   • Filter by date (recent/old files)")
+        print("   • Use Preview to see changes before applying")
+        print("   • Test the Undo system after organizing")
+        print("   • Check Statistics to see the distribution")
 
     except Exception as e:
         print(f"❌ Error: {e}")
