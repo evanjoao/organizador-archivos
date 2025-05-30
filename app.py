@@ -6,6 +6,9 @@ from tkinter import filedialog, messagebox, ttk
 import logging
 from datetime import datetime
 from config import FILE_TYPES, UI_CONFIG, LOG_CONFIG
+from settings_manager import SettingsManager, SettingsWindow
+from preview_undo import PreviewManager, UndoManager, PreviewWindow, UndoWindow
+from filters import FileFilter, FilterWindow
 
 # Logging configuration
 logging.basicConfig(
@@ -14,10 +17,12 @@ logging.basicConfig(
 
 
 class FileOrganizer:
-    def __init__(self):
+    def __init__(self, settings_manager=None):
         self.files_moved_count = 0
         self.folders_created_count = 0
         self.log_messages = []
+        self.settings_manager = settings_manager or SettingsManager()
+        self.file_filter = FileFilter()
 
     def get_file_extension(self, filename):
         """Gets the file extension in lowercase."""
@@ -25,12 +30,35 @@ class FileOrganizer:
 
     def get_category_for_extension(self, extension):
         """Determines the category (folder name) for a given extension."""
-        for category, extensions in FILE_TYPES.items():
+        categories = self.settings_manager.get_categories()
+        for category, extensions in categories.items():
             if extension in extensions:
                 return category
         return "Others"
 
-    def organize_files(self, source_directory, progress_callback=None):
+    def get_files_to_organize(self, source_directory):
+        """Gets the list of files to organize, applying filters."""
+        if not os.path.isdir(source_directory):
+            return []
+
+        try:
+            all_files = [
+                f
+                for f in os.listdir(source_directory)
+                if os.path.isfile(os.path.join(source_directory, f))
+            ]
+
+            # Aplicar filtros
+            filtered_files = self.file_filter.apply_filters(all_files, source_directory)
+            return filtered_files
+
+        except Exception as e:
+            logging.error(f"Error getting files: {e}")
+            return []
+
+    def organize_files(
+        self, source_directory, progress_callback=None, create_operation_record=True
+    ):
         """
         Organizes files in the source directory by moving them to subfolders
         based on their type.
@@ -40,24 +68,25 @@ class FileOrganizer:
                 f"The directory '{source_directory}' does not exist or is invalid."
             )
             logging.error(error_message)
-            self.log_messages.append(error_message)  # Also log in log_messages
+            self.log_messages.append(error_message)
             return 0, 0, error_message
 
         self.files_moved_count = 0
         self.folders_created_count = 0
-        self.log_messages = [
-            f"Starting organization in: {source_directory}"
-        ]  # Initial message
+        self.log_messages = [f"Starting organization in: {source_directory}"]
+
+        # Para el sistema de deshacer
+        operation_moves = []
+        folders_created = []
 
         try:
-            files = [
-                f
-                for f in os.listdir(source_directory)
-                if os.path.isfile(os.path.join(source_directory, f))
-            ]
+            files = self.get_files_to_organize(source_directory)
             total_files = len(files)
+
             if total_files == 0:
-                self.log_messages.append("No files found to organize.")
+                self.log_messages.append(
+                    "No files found to organize (after applying filters)."
+                )
                 return 0, 0, "\n".join(self.log_messages)
 
             for index, item_name in enumerate(files, 1):
@@ -74,6 +103,7 @@ class FileOrganizer:
                     try:
                         os.makedirs(destination_folder_path)
                         self.folders_created_count += 1
+                        folders_created.append(destination_folder_path)
                         msg = f"Folder created: {destination_folder_path}"
                         self.log_messages.append(msg)
                         logging.info(msg)
@@ -86,7 +116,7 @@ class FileOrganizer:
                         continue
 
                 destination_file_path = os.path.join(destination_folder_path, item_name)
-                original_item_name = item_name  # Save original name for logs
+                original_item_name = item_name
                 base_name, ext_name = os.path.splitext(item_name)
                 counter = 1
 
@@ -97,15 +127,21 @@ class FileOrganizer:
                     )
                     counter += 1
 
-                # If the name changed due to collision, use the new name for moving
-                # but the original for the log message if possible.
-                # In this case, item_name is already updated if there was a collision.
-
                 try:
                     shutil.move(item_path, destination_file_path)
                     self.files_moved_count += 1
-                    # Use item_name which is the final filename (may have _counter)
-                    msg = f"Moved: '{item_name}' -> '{category_name}/{item_name}'"
+
+                    # Registrar el movimiento para deshacer
+                    if create_operation_record:
+                        operation_moves.append(
+                            {
+                                "source_path": item_path,
+                                "destination_path": destination_file_path,
+                            }
+                        )
+
+                    final_name = os.path.basename(destination_file_path)
+                    msg = f"Moved: '{original_item_name}' -> '{category_name}/{final_name}'"
                     self.log_messages.append(msg)
                     logging.info(msg)
                 except Exception as e:
@@ -113,11 +149,24 @@ class FileOrganizer:
                     self.log_messages.append(error_msg)
                     logging.error(error_msg)
 
+            # Guardar operación para deshacer
+            if create_operation_record and (
+                self.files_moved_count > 0 or self.folders_created_count > 0
+            ):
+                undo_manager = UndoManager()
+                operation_data = {
+                    "source_directory": source_directory,
+                    "moves": operation_moves,
+                    "folders_created": folders_created,
+                    "files_moved": self.files_moved_count,
+                    "folders_created_count": self.folders_created_count,
+                }
+                undo_manager.save_operation(operation_data)
+
         except Exception as e:
             error_msg = f"Unexpected error during organization: {str(e)}"
             self.log_messages.append(error_msg)
             logging.error(error_msg)
-            # Return current counts and accumulated log messages
             return (
                 self.files_moved_count,
                 self.folders_created_count,
@@ -152,9 +201,14 @@ class App:
             (UI_CONFIG["theme"]["font_family"], UI_CONFIG["theme"]["font_size"]),
         )
 
+        # Inicializar componentes
+        self.settings_manager = SettingsManager()
+        self.file_organizer = FileOrganizer(self.settings_manager)
+        self.preview_manager = PreviewManager(self.file_organizer)
+        self.undo_manager = UndoManager()
+
         self.setup_styles()
         self.setup_ui()
-        self.file_organizer = FileOrganizer()
         self.load_initial_directories()
         self.root.bind("<Configure>", self.on_window_resize)
 
@@ -405,7 +459,49 @@ class App:
             command=self.browse_directory,
             style="Custom.TButton",
         )
-        custom_dir_button.grid(row=1, column=0, sticky="ew")
+        custom_dir_button.grid(
+            row=1,
+            column=0,
+            sticky="ew",
+            pady=(0, UI_CONFIG["theme"]["padding"]["small"]),
+        )
+
+        # Nuevo botón para configuración
+        settings_button = ttk.Button(
+            controls_frame,
+            text="⚙ Settings",
+            command=self.open_settings,
+            style="Custom.TButton",
+        )
+        settings_button.grid(
+            row=2,
+            column=0,
+            sticky="ew",
+            pady=(0, UI_CONFIG["theme"]["padding"]["small"]),
+        )
+
+        # Nuevo botón para filtros
+        filters_button = ttk.Button(
+            controls_frame,
+            text="🔍 Filters",
+            command=self.open_filters,
+            style="Custom.TButton",
+        )
+        filters_button.grid(
+            row=3,
+            column=0,
+            sticky="ew",
+            pady=(0, UI_CONFIG["theme"]["padding"]["small"]),
+        )
+
+        # Nuevo botón para deshacer
+        undo_button = ttk.Button(
+            controls_frame,
+            text="↶ Undo",
+            command=self.open_undo_window,
+            style="Custom.TButton",
+        )
+        undo_button.grid(row=4, column=0, sticky="ew")
 
         selected_dir_frame = ttk.LabelFrame(
             main_frame,
@@ -473,18 +569,35 @@ class App:
             pady=(0, UI_CONFIG["theme"]["padding"]["small"]),
         )
 
-        organize_button = ttk.Button(
-            main_frame,
-            text="Organize Files",
-            command=self.start_organization,
-            style="Custom.TButton",
-        )
-        organize_button.grid(
+        # Botones de organización
+        organize_buttons_frame = ttk.Frame(main_frame)
+        organize_buttons_frame.grid(
             row=4,
             column=0,
             sticky="ew",
             pady=(0, UI_CONFIG["theme"]["padding"]["medium"]),
         )
+        organize_buttons_frame.grid_columnconfigure(0, weight=1)
+        organize_buttons_frame.grid_columnconfigure(1, weight=1)
+
+        preview_button = ttk.Button(
+            organize_buttons_frame,
+            text="📋 Preview Organization",
+            command=self.preview_organization,
+            style="Custom.TButton",
+        )
+        preview_button.grid(row=0, column=0, sticky="ew", padx=(0, 5))
+
+        organize_button = ttk.Button(
+            organize_buttons_frame,
+            text="🗂 Organize Files",
+            command=self.start_organization,
+            style="Custom.TButton",
+        )
+        organize_button.grid(row=0, column=1, sticky="ew", padx=(5, 0))
+
+        # Guardar referencia al botón para poder deshabilitarlo
+        self.organize_button = organize_button
 
         log_frame = ttk.LabelFrame(
             main_frame,
@@ -761,8 +874,214 @@ class App:
             self.progress_var.set(100)  # Ensure the bar reaches the end
             # Enable organize button if it was disabled
 
+    def open_settings(self):
+        """Abre la ventana de configuración de categorías."""
 
-if __name__ == "__main__":
-    root_window = tk.Tk()
-    app = App(root_window)
-    root_window.mainloop()
+        def on_settings_saved():
+            self.add_log_message("Settings updated successfully.", "success")
+            # Recargar las categorías en el organizador
+            self.file_organizer.settings_manager = self.settings_manager
+
+        SettingsWindow(self.root, self.settings_manager, callback=on_settings_saved)
+
+    def open_filters(self):
+        """Abre la ventana de filtros avanzados."""
+
+        def on_filters_applied():
+            total_files = len(
+                self.file_organizer.get_files_to_organize(
+                    self.source_dir_var.get() or os.path.expanduser("~")
+                )
+            )
+            self.add_log_message(
+                f"Filters applied. {total_files} files match criteria.", "info"
+            )
+
+        FilterWindow(
+            self.root,
+            self.file_organizer.file_filter,
+            self.file_organizer,
+            callback=on_filters_applied,
+        )
+
+    def preview_organization(self):
+        """Muestra una previsualización de los cambios que se realizarían."""
+        source_dir = self.source_dir_var.get()
+        if not source_dir:
+            messagebox.showwarning(
+                "Directory Not Specified",
+                "Please select a directory to preview.",
+            )
+            return
+
+        if not os.path.isdir(source_dir):
+            messagebox.showerror(
+                "Invalid Directory",
+                f"The path '{source_dir}' is not a valid directory.",
+            )
+            return
+
+        # Generar previsualización
+        preview_data = self.preview_manager.generate_preview(source_dir)
+
+        if not preview_data:
+            messagebox.showinfo(
+                "Preview", "No files found to organize in the selected directory."
+            )
+            return
+
+        def on_preview_decision(proceed):
+            if proceed:
+                self.start_organization_direct()
+
+        PreviewWindow(self.root, preview_data, callback=on_preview_decision)
+
+    def start_organization_direct(self):
+        """Inicia la organización directamente sin confirmación adicional."""
+        source_dir = self.source_dir_var.get()
+
+        self.clear_log()
+        self.progress_var.set(0)
+
+        try:
+            # Deshabilitar botón durante la organización
+            if hasattr(self, "organize_button"):
+                self.organize_button.config(state=tk.DISABLED)
+
+            files_moved, folders_created, log_details_str = (
+                self.file_organizer.organize_files(
+                    source_dir, progress_callback=self.update_progress
+                )
+            )
+
+            self.add_log_message(log_details_str)
+
+            # Mostrar resultado final
+            if files_moved > 0 or folders_created > 0:
+                final_summary = (
+                    f"Organization completed successfully!\n\n"
+                    f"Files moved: {files_moved}\n"
+                    f"Folders created: {folders_created}\n\n"
+                    f"You can undo this operation if needed."
+                )
+                messagebox.showinfo("Organization Complete", final_summary)
+            else:
+                messagebox.showinfo(
+                    "Organization Complete",
+                    "No changes were made. Files might already be organized.",
+                )
+
+        except Exception as e:
+            error_msg = f"Critical error during organization: {str(e)}"
+            self.add_log_message(error_msg, "error")
+            messagebox.showerror("Critical Error", error_msg)
+            logging.exception(error_msg)
+        finally:
+            self.progress_var.set(100)
+            # Rehabilitar botón
+            if hasattr(self, "organize_button"):
+                self.organize_button.config(state=tk.NORMAL)
+
+    def open_undo_window(self):
+        """Abre la ventana de gestión de operaciones de deshacer."""
+        UndoWindow(self.root, self.undo_manager)
+
+    def show_file_statistics(self):
+        """Muestra estadísticas de los archivos en el directorio seleccionado."""
+        source_dir = self.source_dir_var.get()
+        if not source_dir or not os.path.isdir(source_dir):
+            messagebox.showwarning("Warning", "Please select a valid directory first.")
+            return
+
+        try:
+            files = self.file_organizer.get_files_to_organize(source_dir)
+
+            if not files:
+                messagebox.showinfo(
+                    "Statistics", "No files found in the selected directory."
+                )
+                return
+
+            # Agrupar por categorías
+            categories = {}
+            total_size = 0
+
+            for file_name in files:
+                file_path = os.path.join(source_dir, file_name)
+                file_ext = self.file_organizer.get_file_extension(file_name)
+                category = self.file_organizer.get_category_for_extension(file_ext)
+
+                if category not in categories:
+                    categories[category] = {"count": 0, "size": 0}
+
+                categories[category]["count"] += 1
+                try:
+                    file_size = os.path.getsize(file_path)
+                    categories[category]["size"] += file_size
+                    total_size += file_size
+                except OSError:
+                    pass
+
+            # Crear ventana de estadísticas
+            stats_window = tk.Toplevel(self.root)
+            stats_window.title("File Statistics")
+            stats_window.geometry("400x500")
+            stats_window.transient(self.root)
+            stats_window.grab_set()
+
+            main_frame = ttk.Frame(stats_window, padding="10")
+            main_frame.pack(fill="both", expand=True)
+
+            ttk.Label(
+                main_frame, text="File Statistics", font=("Arial", 14, "bold")
+            ).pack(anchor="w", pady=(0, 10))
+
+            ttk.Label(main_frame, text=f"Total files: {len(files)}").pack(anchor="w")
+            ttk.Label(
+                main_frame, text=f"Total size: {self.format_file_size(total_size)}"
+            ).pack(anchor="w")
+            ttk.Label(main_frame, text=f"Categories: {len(categories)}").pack(
+                anchor="w", pady=(0, 10)
+            )
+
+            # Treeview para categorías
+            tree_frame = ttk.Frame(main_frame)
+            tree_frame.pack(fill="both", expand=True, pady=(0, 10))
+
+            tree = ttk.Treeview(
+                tree_frame, columns=("count", "size"), show="tree headings"
+            )
+            tree.heading("#0", text="Category")
+            tree.heading("count", text="Files")
+            tree.heading("size", text="Size")
+            tree.column("#0", width=150)
+            tree.column("count", width=80)
+            tree.column("size", width=100)
+
+            for category, data in sorted(categories.items()):
+                tree.insert(
+                    "",
+                    "end",
+                    text=category,
+                    values=(data["count"], self.format_file_size(data["size"])),
+                )
+
+            tree.pack(fill="both", expand=True)
+
+            ttk.Button(main_frame, text="Close", command=stats_window.destroy).pack(
+                pady=(10, 0)
+            )
+
+        except Exception as e:
+            messagebox.showerror("Error", f"Error calculating statistics: {e}")
+
+    def format_file_size(self, size_bytes):
+        """Formatea el tamaño del archivo de manera legible."""
+        if size_bytes < 1024:
+            return f"{size_bytes} B"
+        elif size_bytes < 1024**2:
+            return f"{size_bytes/1024:.1f} KB"
+        elif size_bytes < 1024**3:
+            return f"{size_bytes/1024**2:.1f} MB"
+        else:
+            return f"{size_bytes/1024**3:.1f} GB"

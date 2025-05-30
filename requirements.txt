@@ -1,0 +1,27 @@
+# File Organizer - Requisitos del Sistema
+# 
+# Este proyecto utiliza solo librerías estándar de Python
+# No se requieren instalaciones adicionales con pip
+#
+# Requisitos mínimos:
+# - Python >= 3.6
+# - tkinter (incluido con Python por defecto)
+#
+# Para verificar que tienes todo lo necesario, ejecuta:
+# python -c "import tkinter; print('✅ Tkinter disponible')"
+#
+# Si tkinter no está disponible, instálalo según tu sistema:
+#
+# Ubuntu/Debian:
+# sudo apt-get install python3-tk
+#
+# CentOS/RHEL/Fedora:
+# sudo yum install tkinter
+# sudo dnf install python3-tkinter
+#
+# macOS:
+# tkinter viene incluido con Python desde python.org
+# Si usas Homebrew: brew install python-tk
+#
+# Windows:
+# tkinter viene incluido con Python desde python.org
