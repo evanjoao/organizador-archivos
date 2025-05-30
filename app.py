@@ -1,22 +1,30 @@
 # -*- coding: utf-8 -*-
-import os
-import shutil
-import tkinter as tk
-from tkinter import filedialog, messagebox, ttk
-import logging
-from datetime import datetime
-from config import FILE_TYPES, UI_CONFIG, LOG_CONFIG
-from settings_manager import SettingsManager, SettingsWindow
-from preview_undo import PreviewManager, UndoManager, PreviewWindow, UndoWindow
-from filters import FileFilter, FilterWindow
+"""
+File Organizer - Modular version
 
-# Logging configuration
-logging.basicConfig(
-    filename=LOG_CONFIG["log_file"], level=logging.INFO, format=LOG_CONFIG["log_format"]
-)
+This file maintains backward compatibility while using the new modular structure.
+The application has been broken down into the following modules:
 
+- file_organizer_core.py: Core file organization logic
+- ui_components.py: UI styling and theme management
+- directory_manager.py: Directory tree management
+- statistics.py: File statistics functionality
+- main_app.py: Main application orchestration
 
-class FileOrganizer:
+For new development, use main_app.py directly.
+"""
+
+# Import the modular components
+from main_app import FileOrganizerApp, main
+from file_organizer_core import FileOrganizer
+
+# Maintain backward compatibility
+App = FileOrganizerApp
+
+# Re-export the main function for backward compatibility
+if __name__ == "__main__":
+    main()
+
     def __init__(self, settings_manager=None):
         self.files_moved_count = 0
         self.folders_created_count = 0
@@ -1085,3 +1093,26 @@ class App:
             return f"{size_bytes/1024**2:.1f} MB"
         else:
             return f"{size_bytes/1024**3:.1f} GB"
+
+
+def main():
+    """Main function to start the File Organizer application."""
+    root = tk.Tk()
+    app = App(root)
+
+    # Center the window on the screen
+    root.update_idletasks()
+    x = (root.winfo_screenwidth() // 2) - (root.winfo_width() // 2)
+    y = (root.winfo_screenheight() // 2) - (root.winfo_height() // 2)
+    root.geometry(f"+{x}+{y}")
+
+    # Add a welcome message to the log
+    app.add_log_message("File Organizer started successfully!", "success")
+    app.add_log_message("Select a directory to organize files by type.", "info")
+
+    # Start the GUI event loop
+    root.mainloop()
+
+
+if __name__ == "__main__":
+    main()
